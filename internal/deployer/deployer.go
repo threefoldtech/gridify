@@ -2,12 +2,13 @@ package deployer
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"log"
 	"net"
 	"os"
+	"strings"
+	"time"
 
-	"github.com/joho/godotenv"
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
 	"github.com/threefoldtech/grid3-go/workloads"
 	"github.com/threefoldtech/zos/pkg/gridtypes"
@@ -18,20 +19,13 @@ type deployer struct {
 }
 
 func NewDeployer() deployer {
-	if _, err := os.Stat("../.env"); !errors.Is(err, os.ErrNotExist) {
-		err := godotenv.Load("../.env")
-		if err != nil {
-			return deployer{}
-		}
-	}
-
 	mnemonics := os.Getenv("MNEMONICS")
 	log.Printf("mnemonics: %s", mnemonics)
 
 	network := os.Getenv("NETWORK")
 	log.Printf("network: %s", network)
 
-	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", true, "", true)
+	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", true, false)
 	if err != nil {
 		return deployer{}
 	}
@@ -82,5 +76,21 @@ func (b *deployer) Deploy(ctx context.Context, repoURL string) (string, error) {
 		return "", err
 	}
 
-	return resVM.ComputedIP, nil
+	publicIP := strings.Split(resVM.ComputedIP, "/")[0]
+	if !testConnection(publicIP, "22") {
+		return "", fmt.Errorf("public ip %s is not reachable", publicIP)
+	}
+
+	return publicIP, nil
+}
+
+func testConnection(addr string, port string) bool {
+	for t := time.Now(); time.Since(t) < 3*time.Minute; {
+		con, err := net.DialTimeout("tcp", net.JoinHostPort(addr, port), time.Second*12)
+		if err == nil {
+			con.Close()
+			return true
+		}
+	}
+	return false
 }
