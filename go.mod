@@ -3,6 +3,11 @@ module github.com/rawdaGastan/gridify
 go 1.19
 
 require (
+	github.com/threefoldtech/grid3-go v0.0.0-20230213143658-296c22370f49
+	github.com/threefoldtech/zos v0.5.6-0.20230103093557-d9c7fe2b92e7
+)
+
+require (
 	github.com/ChainSafe/go-schnorrkel v1.0.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
@@ -17,6 +22,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gomodule/redigo v2.0.0+incompatible // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -32,10 +38,8 @@ require (
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/rs/zerolog v1.26.0 // indirect
 	github.com/threefoldtech/go-rmb v0.2.0 // indirect
-	github.com/threefoldtech/grid3-go v0.0.0-20230212151630-adc8bfc70901
 	github.com/threefoldtech/grid_proxy_server v1.5.6 // indirect
 	github.com/threefoldtech/substrate-client v0.0.0-20230111172347-137127470b5d // indirect
-	github.com/threefoldtech/zos v0.5.6-0.20230103093557-d9c7fe2b92e7
 	github.com/vedhavyas/go-subkey v1.0.3 // indirect
 	golang.org/x/crypto v0.0.0-20220518034528-6f7dac969898 // indirect
 	golang.org/x/sys v0.4.0 // indirect

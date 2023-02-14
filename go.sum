@@ -536,6 +536,8 @@ github.com/google/go-cmp v0.5.4/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-cmp v0.5.6 h1:BKbKCqvP6I+rmFHt06ZmyQtvB8xAkWdhFyr0ZUNZcxQ=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
+github.com/google/go-querystring v1.1.0 h1:AnCroh3fv4ZBgVIf1Iwtovgjaw/GiKJo8M8yD/fhyJ8=
+github.com/google/go-querystring v1.1.0/go.mod h1:Kcdr2DB4koayq7X8pmAG4sNG59So17icRSOU623lUBU=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/gofuzz v1.1.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/gofuzz v1.1.1-0.20200604201612-c04b05f3adfa h1:Q75Upo5UN4JbPFURXZ8nLKYUvF85dyFRop/vQ0Rv+64=
@@ -1013,8 +1015,10 @@ github.com/threefoldtech/go-rmb v0.2.0 h1:OtEfI2SaohfCWn/5bdLsXS18UB5GMh998py1jN
 github.com/threefoldtech/go-rmb v0.2.0/go.mod h1:EMzItTB2SESWK9YWEsc6UD+CmLJIC2dxOp3Cz+YZYeE=
 github.com/threefoldtech/go-substrate-rpc-client/v4 v4.0.6-0.20230102154731-7c633b7d3c71 h1:vvoXPRI10quMOEXHKcakKhBZe+TlLXhNsh1wwX4cyk4=
 github.com/threefoldtech/go-substrate-rpc-client/v4 v4.0.6-0.20230102154731-7c633b7d3c71/go.mod h1:5g1oM4Zu3BOaLpsKQ+O8PAv2kNuq+kPcA1VzFbsSqxE=
-github.com/threefoldtech/grid3-go v0.0.0-20230212151630-adc8bfc70901 h1:/phE1kPSdTIczWgKYxZjJXVy+Bl2cAL+3c3xUKZRzRw=
-github.com/threefoldtech/grid3-go v0.0.0-20230212151630-adc8bfc70901/go.mod h1:hLHJ9RGbkMc6hTA9AzH8aKWfWyY2bmcsdSlcpuv59kk=
+github.com/threefoldtech/grid3-go v0.0.0-20230213103815-95056841907e h1:3cIjC5AM+h8vDg4m4gFNIApEyt7a5phNv2XntqjCsEg=
+github.com/threefoldtech/grid3-go v0.0.0-20230213103815-95056841907e/go.mod h1:hLHJ9RGbkMc6hTA9AzH8aKWfWyY2bmcsdSlcpuv59kk=
+github.com/threefoldtech/grid3-go v0.0.0-20230213143658-296c22370f49 h1:ZhbSPAA8sUZlhMHwzuOONTgDdBI5CGVI3UIh0p4ceLI=
+github.com/threefoldtech/grid3-go v0.0.0-20230213143658-296c22370f49/go.mod h1:hLHJ9RGbkMc6hTA9AzH8aKWfWyY2bmcsdSlcpuv59kk=
 github.com/threefoldtech/grid_proxy_server v1.5.6 h1:CRdvDOJS3P/IY7ZyNB1vEjrZjfKJwyMDsuP28sOdpI8=
 github.com/threefoldtech/grid_proxy_server v1.5.6/go.mod h1:T8faHtrH+pJu03IVMngcvscSlZv9kaam9a839br0WD0=
 github.com/threefoldtech/substrate-client v0.0.0-20220224131248-f56a2e9fa1d4/go.mod h1:Lpsz7gVNSdbWD8erfVh1AZv2wnProc7g/QHJiYp5lP8=
