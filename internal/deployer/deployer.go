@@ -31,8 +31,11 @@ func NewDeployer(mnemonics string) (deployer, error) {
 }
 
 func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, error) {
+	randomString := randString(10)
+	networkName := fmt.Sprintf("gnet%s", randomString)
+	vmName := fmt.Sprintf("gvm%s", randomString)
 	network := workloads.ZNet{
-		Name:        "gridifyNetwork",
+		Name:        networkName,
 		Description: "network for testing",
 		Nodes:       []uint32{2},
 		IPRange: gridtypes.NewIPNet(net.IPNet{
@@ -43,7 +46,7 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, er
 	}
 
 	vm := workloads.VM{
-		Name:       "gridifyVM",
+		Name:       vmName,
 		Flist:      "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist",
 		CPU:        2,
 		Planetary:  true,
@@ -75,7 +78,7 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, er
 	backend := fmt.Sprintf("http://[%s]:%s", resVM.YggIP, port)
 	gw := workloads.GatewayNameProxy{
 		NodeID:         2,
-		Name:           "gridify",
+		Name:           randomString,
 		TLSPassthrough: false,
 		Backends:       []zos.Backend{zos.Backend(backend)},
 	}
@@ -84,7 +87,7 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, er
 	if err != nil {
 		return "", nil
 	}
-	gwRes, err := d.tfPluginClient.StateLoader.LoadGatewayNameFromGrid(2, "gridify")
+	gwRes, err := d.tfPluginClient.StateLoader.LoadGatewayNameFromGrid(2, gw.Name)
 	if err != nil {
 		return "", err
 	}
