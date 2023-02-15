@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
@@ -54,6 +55,7 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, projectName, port string
 		Name:       vmName,
 		Flist:      "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist",
 		CPU:        2,
+		PublicIP:   true,
 		Planetary:  true,
 		Memory:     1024,
 		RootfsSize: 20 * 1024,
@@ -80,7 +82,7 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, projectName, port string
 		return "", err
 	}
 
-	backend := fmt.Sprintf("http://[%s]:%s", resVM.YggIP, port)
+	backend := fmt.Sprintf("http://%s:%s", strings.Split(resVM.ComputedIP, "/")[0], port)
 	gw := workloads.GatewayNameProxy{
 		NodeID:         2,
 		Name:           randomString,
