@@ -3,7 +3,7 @@ module github.com/rawdaGastan/gridify
 go 1.19
 
 require (
-	github.com/threefoldtech/grid3-go v0.0.0-20230213143658-296c22370f49
+	github.com/threefoldtech/grid3-go v0.0.0-20230215101258-925a90ef70c0
 	github.com/threefoldtech/zos v0.5.6-0.20230103093557-d9c7fe2b92e7
 )
 

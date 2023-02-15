@@ -3,8 +3,11 @@ package deployer
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
+	"strconv"
+	"time"
 
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
 	"github.com/threefoldtech/grid3-go/workloads"
@@ -30,7 +33,8 @@ func NewDeployer(mnemonics string) (deployer, error) {
 	return deployer{tfPluginClient: &tfPluginClient}, nil
 }
 
-func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, error) {
+func (d *deployer) Deploy(ctx context.Context, repoURL, projectName, port string) (string, error) {
+	rand.Seed(time.Now().UnixNano())
 	randomString := randString(10)
 	networkName := fmt.Sprintf("gnet%s", randomString)
 	vmName := fmt.Sprintf("gvm%s", randomString)
@@ -42,7 +46,8 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, er
 			IP:   net.IPv4(10, 20, 0, 0),
 			Mask: net.CIDRMask(16, 32),
 		}),
-		AddWGAccess: false,
+		AddWGAccess:  false,
+		SolutionType: projectName,
 	}
 
 	vm := workloads.VM{
@@ -64,13 +69,13 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, er
 		return "", err
 	}
 
-	dl := workloads.NewDeployment(vm.Name, 2, "", nil, network.Name, nil, nil, []workloads.VM{vm}, nil)
+	dl := workloads.NewDeployment(vm.Name, 2, projectName, nil, network.Name, nil, nil, []workloads.VM{vm}, nil)
 	err = d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
 
 	if err != nil {
 		return "", err
 	}
-	resVM, err := d.tfPluginClient.StateLoader.LoadVMFromGrid(2, vm.Name)
+	resVM, err := d.tfPluginClient.State.LoadVMFromGrid(2, vm.Name)
 	if err != nil {
 		return "", err
 	}
@@ -81,16 +86,38 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, port string) (string, er
 		Name:           randomString,
 		TLSPassthrough: false,
 		Backends:       []zos.Backend{zos.Backend(backend)},
+		SolutionType:   projectName,
 	}
 
 	err = d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gw)
 	if err != nil {
 		return "", nil
 	}
-	gwRes, err := d.tfPluginClient.StateLoader.LoadGatewayNameFromGrid(2, gw.Name)
+	gwRes, err := d.tfPluginClient.State.LoadGatewayNameFromGrid(2, gw.Name)
 	if err != nil {
 		return "", err
 	}
 
 	return gwRes.FQDN, nil
+}
+
+func (d *deployer) Destroy(projectName string) error {
+	contracts, err := d.tfPluginClient.ContractsGetter.ListContractsOfProjectName(projectName)
+	if err != nil {
+		return err
+	}
+	contractsSlice := make([]gridDeployer.Contract, 0)
+	contractsSlice = append(contractsSlice, contracts.NameContracts...)
+	contractsSlice = append(contractsSlice, contracts.NodeContracts...)
+	for _, contract := range contractsSlice {
+		contractID, err := strconv.ParseUint(contract.ContractID, 0, 64)
+		if err != nil {
+			return err
+		}
+		err = d.tfPluginClient.SubstrateConn.CancelContract(d.tfPluginClient.Identity, contractID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
