@@ -14,7 +14,7 @@ func main() {
 	deployCMD := flag.NewFlagSet("deploy", flag.ExitOnError)
 
 	deployCMD.StringVar(&mnemonics, "mnemonics", "", "mneomnics for authentication")
-	port := deployCMD.String("port", "", "port to forward the FQDN to")
+	ports := deployCMD.String("ports", "", "ports to forward the FQDN to")
 
 	destroyCMD := flag.NewFlagSet("destroy", flag.ExitOnError)
 	destroyCMD.StringVar(&mnemonics, "mnemonics", "", "mneomnics for authentication")
@@ -35,11 +35,11 @@ func main() {
 			fmt.Println("mnemonics not provided")
 			os.Exit(1)
 		}
-		if *port == "" {
+		if *ports == "" {
 			fmt.Println("port not provided")
 			os.Exit(1)
 		}
-		err = cmd.HandleDeploy(mnemonics, *port)
+		err = cmd.HandleDeploy(mnemonics, *ports)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

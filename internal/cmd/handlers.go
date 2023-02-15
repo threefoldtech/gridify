@@ -9,7 +9,7 @@ import (
 	"github.com/rawdaGastan/gridify/internal/deployer"
 )
 
-func HandleDeploy(mnemonics, port string) error {
+func HandleDeploy(mnemonics, ports string) error {
 	deployer, err := deployer.NewDeployer(mnemonics)
 	if err != nil {
 		return err
@@ -23,12 +23,13 @@ func HandleDeploy(mnemonics, port string) error {
 	if !found {
 		return fmt.Errorf("couldn't get project name")
 	}
+	portsSlice := strings.Split(ports, ",")
 
-	FQDN, err := deployer.Deploy(context.Background(), string(repoURL), projectName, port)
+	FQDNs, err := deployer.Deploy(context.Background(), string(repoURL), projectName, portsSlice)
 	if err != nil {
 		return err
 	}
-	fmt.Println(FQDN)
+	fmt.Println(FQDNs)
 	return err
 }
 

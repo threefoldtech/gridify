@@ -34,11 +34,12 @@ func NewDeployer(mnemonics string) (deployer, error) {
 	return deployer{tfPluginClient: &tfPluginClient}, nil
 }
 
-func (d *deployer) Deploy(ctx context.Context, repoURL, projectName, port string) (string, error) {
+func (d *deployer) Deploy(ctx context.Context, repoURL, projectName string, ports []string) ([]string, error) {
 	rand.Seed(time.Now().UnixNano())
 	randomString := randString(10)
 	networkName := fmt.Sprintf("gnet%s", randomString)
 	vmName := fmt.Sprintf("gvm%s", randomString)
+	FQDNs := make([]string, 0)
 	network := workloads.ZNet{
 		Name:        networkName,
 		Description: "network for testing",
@@ -68,39 +69,44 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, projectName, port string
 
 	err := d.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
 	if err != nil {
-		return "", err
+		return FQDNs, err
 	}
 
 	dl := workloads.NewDeployment(vm.Name, 2, projectName, nil, network.Name, nil, nil, []workloads.VM{vm}, nil)
 	err = d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
 
 	if err != nil {
-		return "", err
+		return FQDNs, err
 	}
 	resVM, err := d.tfPluginClient.State.LoadVMFromGrid(2, vm.Name)
 	if err != nil {
-		return "", err
+		return FQDNs, err
+	}
+	publicIP := strings.Split(resVM.ComputedIP, "/")[0]
+
+	for _, port := range ports {
+		domainName := randString(10)
+		backend := fmt.Sprintf("http://%s:%s", publicIP, port)
+		gw := workloads.GatewayNameProxy{
+			NodeID:         2,
+			Name:           domainName,
+			TLSPassthrough: false,
+			Backends:       []zos.Backend{zos.Backend(backend)},
+			SolutionType:   projectName,
+		}
+
+		err = d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gw)
+		if err != nil {
+			return FQDNs, nil
+		}
+		gwRes, err := d.tfPluginClient.State.LoadGatewayNameFromGrid(2, gw.Name)
+		if err != nil {
+			return FQDNs, err
+		}
+		FQDNs = append(FQDNs, gwRes.FQDN)
 	}
 
-	backend := fmt.Sprintf("http://%s:%s", strings.Split(resVM.ComputedIP, "/")[0], port)
-	gw := workloads.GatewayNameProxy{
-		NodeID:         2,
-		Name:           randomString,
-		TLSPassthrough: false,
-		Backends:       []zos.Backend{zos.Backend(backend)},
-		SolutionType:   projectName,
-	}
-
-	err = d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gw)
-	if err != nil {
-		return "", nil
-	}
-	gwRes, err := d.tfPluginClient.State.LoadGatewayNameFromGrid(2, gw.Name)
-	if err != nil {
-		return "", err
-	}
-
-	return gwRes.FQDN, nil
+	return FQDNs, nil
 }
 
 func (d *deployer) Destroy(projectName string) error {
