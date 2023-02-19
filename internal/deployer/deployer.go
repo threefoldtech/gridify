@@ -15,19 +15,20 @@ import (
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
 )
 
-type deployer struct {
+// Deployer struct manages project deployment
+type Deployer struct {
 	tfPluginClient *gridDeployer.TFPluginClient
 
 	logger zerolog.Logger
 }
 
 // NewDeployer return new project deployer
-func NewDeployer(mnemonics, network string, showLogs bool) (deployer, error) {
+func NewDeployer(mnemonics, network string, showLogs bool) (Deployer, error) {
 	rand.Seed(time.Now().UnixNano())
 
 	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", true, false)
 	if err != nil {
-		return deployer{}, err
+		return Deployer{}, err
 	}
 	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).
 		With().
@@ -37,14 +38,14 @@ func NewDeployer(mnemonics, network string, showLogs bool) (deployer, error) {
 		logger = zerolog.New(zerolog.ConsoleWriter{Out: io.Discard})
 	}
 
-	return deployer{
+	return Deployer{
 			tfPluginClient: &tfPluginClient,
 			logger:         logger,
 		},
 		nil
 }
 
-func (d *deployer) Deploy(ctx context.Context, repoURL, projectName string, ports []string) (map[string]string, error) {
+func (d *Deployer) Deploy(ctx context.Context, repoURL, projectName string, ports []string) (map[string]string, error) {
 
 	randomString := randString(10)
 
@@ -111,7 +112,7 @@ func (d *deployer) Deploy(ctx context.Context, repoURL, projectName string, port
 	return FQDNs, nil
 }
 
-func (d *deployer) Destroy(projectName string) error {
+func (d *Deployer) Destroy(projectName string) error {
 	d.logger.Info().Msgf("getting contracts for project %s", projectName)
 	contracts, err := d.tfPluginClient.ContractsGetter.ListContractsOfProjectName(projectName)
 	if err != nil {
