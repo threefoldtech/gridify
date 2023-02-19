@@ -45,6 +45,7 @@ func NewDeployer(mnemonics, network string, showLogs bool) (Deployer, error) {
 		nil
 }
 
+// Deploy deploys a project and map each port to a domain
 func (d *Deployer) Deploy(ctx context.Context, repoURL, projectName string, ports []string) (map[string]string, error) {
 
 	randomString := randString(10)
@@ -112,6 +113,7 @@ func (d *Deployer) Deploy(ctx context.Context, repoURL, projectName string, port
 	return FQDNs, nil
 }
 
+// Destroy destroys all the contracts of a project
 func (d *Deployer) Destroy(projectName string) error {
 	d.logger.Info().Msgf("getting contracts for project %s", projectName)
 	contracts, err := d.tfPluginClient.ContractsGetter.ListContractsOfProjectName(projectName)
