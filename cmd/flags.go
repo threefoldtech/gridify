@@ -1,3 +1,4 @@
+// Package cmd for handling command line arguments
 package cmd
 
 import (
@@ -6,6 +7,7 @@ import (
 	"os"
 )
 
+// Run set command flags and parse arguments
 func Run() {
 	var showLogs bool
 
@@ -54,7 +56,7 @@ func Run() {
 			fmt.Fprintf(os.Stderr, "fatal: ports not provided")
 			os.Exit(1)
 		}
-		err = Deploy(*ports, showLogs)
+		err = deploy(*ports, showLogs)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
 			os.Exit(1)
@@ -65,7 +67,7 @@ func Run() {
 			fmt.Fprint(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-		err = Destroy(showLogs)
+		err = destroy(showLogs)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
 			os.Exit(1)
@@ -84,7 +86,7 @@ func Run() {
 			fmt.Fprintf(os.Stderr, "fatal: network not provided")
 			os.Exit(1)
 		}
-		err = Login(*mnemonics, *network, showLogs)
+		err = login(*mnemonics, *network, showLogs)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
 			os.Exit(1)

@@ -1,3 +1,4 @@
+// Package deployer for project deployment
 package deployer
 
 import (
@@ -20,6 +21,7 @@ type deployer struct {
 	logger zerolog.Logger
 }
 
+// NewDeployer return new project deployer
 func NewDeployer(mnemonics, network string, showLogs bool) (deployer, error) {
 	rand.Seed(time.Now().UnixNano())
 

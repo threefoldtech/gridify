@@ -1,3 +1,4 @@
+// Package cmd for handling command line arguments
 package cmd
 
 import (
@@ -9,7 +10,7 @@ import (
 	"github.com/rawdaGastan/gridify/internal/deployer"
 )
 
-func Destroy(showLogs bool) error {
+func destroy(showLogs bool) error {
 	config, err := config.LoadConfigData()
 	if err != nil {
 		return err

@@ -1,3 +1,4 @@
+// Package cmd for handling command line arguments
 package cmd
 
 import (
@@ -10,7 +11,7 @@ import (
 	"github.com/rawdaGastan/gridify/internal/deployer"
 )
 
-func Deploy(ports string, showLogs bool) error {
+func deploy(ports string, showLogs bool) error {
 	config, err := config.LoadConfigData()
 	if err != nil {
 		return err
