@@ -122,7 +122,7 @@ func (d *deployer) Destroy(projectName string) error {
 	for _, contract := range contractsSlice {
 		contractID, err := strconv.ParseUint(contract.ContractID, 0, 64)
 		if err != nil {
-			return errors.Wrapf(err, "could not parse contract %s into uint64", contract)
+			return errors.Wrapf(err, "could not parse contract %s into uint64", contract.ContractID)
 		}
 		d.logger.Info().Msgf("canceling contract %d", contractID)
 

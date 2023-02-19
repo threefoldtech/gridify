@@ -45,25 +45,37 @@ func Run() {
 
 	switch os.Args[1] {
 	case "deploy":
-		deployCMD.Parse(os.Args[2:])
+		err := deployCMD.Parse(os.Args[2:])
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		if *ports == "" {
 			fmt.Fprintf(os.Stderr, "fatal: ports not provided")
 			os.Exit(1)
 		}
-		err := Deploy(*ports, showLogs)
+		err = Deploy(*ports, showLogs)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
 			os.Exit(1)
 		}
 	case "destroy":
-		destroyCMD.Parse(os.Args[2:])
-		err := Destroy(showLogs)
+		err := destroyCMD.Parse(os.Args[2:])
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		err = Destroy(showLogs)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
 			os.Exit(1)
 		}
 	case "login":
-		loginCMD.Parse(os.Args[2:])
+		err := loginCMD.Parse(os.Args[2:])
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
+		}
 		if *mnemonics == "" {
 			fmt.Fprintf(os.Stderr, "fatal: mnemonics not provided")
 			os.Exit(1)
@@ -72,7 +84,7 @@ func Run() {
 			fmt.Fprintf(os.Stderr, "fatal: network not provided")
 			os.Exit(1)
 		}
-		err := Login(*mnemonics, *network, showLogs)
+		err = Login(*mnemonics, *network, showLogs)
 		if err != nil {
 			fmt.Fprint(os.Stderr, err)
 			os.Exit(1)
