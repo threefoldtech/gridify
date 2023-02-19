@@ -3,6 +3,8 @@ module github.com/rawdaGastan/gridify
 go 1.19
 
 require (
+	github.com/pkg/errors v0.9.1
+	github.com/rs/zerolog v1.26.0
 	github.com/threefoldtech/grid3-go v0.0.0-20230215101258-925a90ef70c0
 	github.com/threefoldtech/zos v0.5.6-0.20230103093557-d9c7fe2b92e7
 )
@@ -34,9 +36,7 @@ require (
 	github.com/mimoo/StrobeGo v0.0.0-20210601165009-122bf33a46e0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pierrec/xxHash v0.1.5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/cors v1.8.2 // indirect
-	github.com/rs/zerolog v1.26.0 // indirect
 	github.com/threefoldtech/go-rmb v0.2.0 // indirect
 	github.com/threefoldtech/grid_proxy_server v1.5.6 // indirect
 	github.com/threefoldtech/substrate-client v0.0.0-20230111172347-137127470b5d // indirect

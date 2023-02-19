@@ -6,11 +6,16 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rawdaGastan/gridify/internal/deployer"
 )
 
-func HandleDeploy(mnemonics, ports string) error {
-	deployer, err := deployer.NewDeployer(mnemonics)
+func Deploy(ports string, showLogs bool) error {
+	config, err := config.LoadConfigData()
+	if err != nil {
+		return err
+	}
+	deployer, err := deployer.NewDeployer(config.Mnemonics, config.Network, showLogs)
 	if err != nil {
 		return err
 	}
@@ -29,24 +34,10 @@ func HandleDeploy(mnemonics, ports string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(FQDNs)
-	return err
-}
 
-func HandleDestroy(mnemonics string) error {
-
-	deployer, err := deployer.NewDeployer(mnemonics)
-	if err != nil {
-		return err
+	fmt.Println("Project Deployed!")
+	for port, FQDN := range FQDNs {
+		fmt.Printf("%s: %s\n", port, FQDN)
 	}
-	repoURL, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
-	if err != nil {
-		return err
-	}
-	splitURL := strings.Split(string(repoURL), "/")
-	projectName, _, found := strings.Cut(splitURL[len(splitURL)-1], ".git")
-	if !found {
-		return fmt.Errorf("couldn't get project name")
-	}
-	return deployer.Destroy(string(projectName))
+	return nil
 }
