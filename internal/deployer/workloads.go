@@ -2,17 +2,46 @@
 package deployer
 
 import (
-	"context"
 	"fmt"
 	"net"
 	"strings"
 
 	"github.com/threefoldtech/grid3-go/workloads"
+	"github.com/threefoldtech/grid_proxy_server/pkg/types"
 	"github.com/threefoldtech/zos/pkg/gridtypes"
 	"github.com/threefoldtech/zos/pkg/gridtypes/zos"
 )
 
-func (d *Deployer) deployNetwork(ctx context.Context, networkName, projectName string, node uint32) error {
+var (
+	vmFlist      = "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist"
+	vmCPU        = 2
+	vmMemory     = 2 * 1024
+	vmRootfsSize = 5 * 1024
+	vmEntrypoint = "/init.sh"
+	vmPublicIP   = true
+	vmPlanetary  = true
+)
+
+func constructNodeFilter() types.NodeFilter {
+	nodeStatus := "up"
+	freeMRU := uint64(2)
+	freeHRU := uint64(5)
+	freeIPs := uint64(1)
+	domain := true
+
+	filter := types.NodeFilter{
+		FarmIDs: []uint64{1},
+		Status:  &nodeStatus,
+		FreeMRU: &freeMRU,
+		FreeHRU: &freeHRU,
+		FreeIPs: &freeIPs,
+		Domain:  &domain,
+	}
+	return filter
+}
+
+func constructNetwork(projectName string, node uint32) workloads.ZNet {
+	networkName := randString(10)
 	network := workloads.ZNet{
 		Name:  networkName,
 		Nodes: []uint32{node},
@@ -22,53 +51,43 @@ func (d *Deployer) deployNetwork(ctx context.Context, networkName, projectName s
 		}),
 		SolutionType: projectName,
 	}
-	return d.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
-
+	return network
 }
-func (d *Deployer) deployVM(ctx context.Context, networkName, projectName, repoURL, vmName string, node uint32) error {
 
+func constructDeployment(networkName, projectName, repoURL string, node uint32) workloads.Deployment {
+	vmName := randString(10)
 	vm := workloads.VM{
 		Name:       vmName,
-		Flist:      "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist",
-		CPU:        2,
-		PublicIP:   true,
-		Planetary:  true,
-		Memory:     2 * 1024,
-		RootfsSize: 5 * 1024,
-		Entrypoint: "/init.sh",
+		Flist:      vmFlist,
+		CPU:        vmCPU,
+		PublicIP:   vmPublicIP,
+		Planetary:  vmPlanetary,
+		Memory:     vmMemory,
+		RootfsSize: vmRootfsSize,
+		Entrypoint: vmEntrypoint,
 		EnvVars: map[string]string{
 			"REPO_URL": repoURL,
 		},
 		NetworkName: networkName,
 	}
 
-	dl := workloads.NewDeployment(vm.Name, 2, projectName, nil, networkName, nil, nil, []workloads.VM{vm}, nil)
-	return d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
-
+	dl := workloads.NewDeployment(vm.Name, node, projectName, nil, networkName, nil, nil, []workloads.VM{vm}, nil)
+	return dl
 }
 
-func (d *Deployer) constructPortlessBackend(ctx context.Context, node uint32, vmName string) (string, error) {
-	resVM, err := d.tfPluginClient.State.LoadVMFromGrid(node, vmName)
-	if err != nil {
-		return "", err
-	}
-	publicIP := strings.Split(resVM.ComputedIP, "/")[0]
-	backend := fmt.Sprintf("http://%s", publicIP)
-	return backend, nil
-}
-func (d *Deployer) deployGateway(ctx context.Context, backend, projectName, subdomain string, node uint32) error {
-	gw := workloads.GatewayNameProxy{
+func constructGateway(backend, projectName string, node uint32) workloads.GatewayNameProxy {
+	subdomain := randString(10)
+	gateway := workloads.GatewayNameProxy{
 		NodeID:       node,
 		Name:         subdomain,
 		Backends:     []zos.Backend{zos.Backend(backend)},
 		SolutionType: projectName,
 	}
-
-	return d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gw)
+	return gateway
 }
 
-func (d *Deployer) getFQDN(ctx context.Context, subdomain string, node uint32) (string, error) {
-	gwRes, err := d.tfPluginClient.State.LoadGatewayNameFromGrid(node, subdomain)
-	return gwRes.FQDN, err
-
+func constructPortlessBackend(ip string) string {
+	publicIP := strings.Split(ip, "/")[0]
+	backend := fmt.Sprintf("http://%s", publicIP)
+	return backend
 }

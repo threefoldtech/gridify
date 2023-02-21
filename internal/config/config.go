@@ -22,7 +22,7 @@ func SaveConfigData(mnemonics, network string) error {
 
 	configDir, err := os.UserConfigDir()
 	if err != nil {
-		return errors.Wrap(err, "could not get user configuration directory")
+		return errors.Wrap(err, "could not get configuration directory")
 	}
 	path := filepath.Join(configDir, configFile)
 	configFile, err := os.Create(path)
@@ -40,7 +40,7 @@ func SaveConfigData(mnemonics, network string) error {
 	}
 	_, err = configFile.Write(configJSON)
 	if err != nil {
-		return errors.Wrapf(err, "could not wirte configuration data to file %s", configFile.Name())
+		return errors.Wrapf(err, "could not write configuration data to file %s", configFile.Name())
 	}
 	return nil
 }
@@ -49,14 +49,14 @@ func SaveConfigData(mnemonics, network string) error {
 func LoadConfigData() (Config, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
-		return Config{}, errors.Wrap(err, "could not get user configuration directory")
+		return Config{}, errors.Wrap(err, "could not get configuration directory")
 	}
 	path := filepath.Join(configDir, configFile)
 	configJSON, err := os.ReadFile(path)
 	if err != nil {
 		return Config{}, errors.Wrapf(err, "could not read configuration file %s", path)
 	}
-	config := Config{}
+	var config Config
 	err = json.Unmarshal(configJSON, &config)
 	if err != nil {
 		return config, errors.Wrapf(err, "could not unmarshal configuration data %s", configJSON)
