@@ -3,6 +3,7 @@ module github.com/rawdaGastan/gridify
 go 1.19
 
 require (
+	github.com/bernix/cosmos-key-sign v0.0.0-20210201084248-82c4c571704a
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1

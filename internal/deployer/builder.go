@@ -6,7 +6,9 @@ import (
 	"net"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/threefoldtech/grid3-go/workloads"
+	"github.com/threefoldtech/grid_proxy_server/pkg/client"
 	"github.com/threefoldtech/grid_proxy_server/pkg/types"
 	"github.com/threefoldtech/zos/pkg/gridtypes"
 	"github.com/threefoldtech/zos/pkg/gridtypes/zos"
@@ -38,6 +40,20 @@ func constructNodeFilter() types.NodeFilter {
 		Domain:  &domain,
 	}
 	return filter
+}
+
+func findNode(gridProxyClient client.Client) (uint32, error) {
+	filter := constructNodeFilter()
+	nodes, _, err := gridProxyClient.Nodes(filter, types.Limit{})
+	if err != nil {
+		return 0, err
+	}
+	if len(nodes) == 0 {
+		return 0, errors.New("no node with free resources available")
+	}
+
+	node := uint32(nodes[0].NodeID)
+	return node, nil
 }
 
 func constructNetwork(projectName string, node uint32) workloads.ZNet {

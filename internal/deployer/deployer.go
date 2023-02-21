@@ -6,13 +6,12 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
-	"github.com/threefoldtech/grid3-go/graphql"
-	"github.com/threefoldtech/grid_proxy_server/pkg/types"
 )
 
 // Deployer struct manages project deployment
@@ -33,19 +32,19 @@ func NewDeployer(mnemonics, network string, repoURL string, logger zerolog.Logge
 	if err != nil {
 		return Deployer{}, err
 	}
+	deployer := Deployer{
+		tfPluginClient: &tfPluginClient,
+		logger:         logger,
+		repoURL:        repoURL,
+	}
 
-	projectName, err := getProjectName(repoURL)
+	projectName, err := deployer.getProjectName()
 	if err != nil {
 		return Deployer{}, err
 	}
+	deployer.projectName = projectName
 
-	return Deployer{
-			tfPluginClient: &tfPluginClient,
-			logger:         logger,
-			repoURL:        repoURL,
-			projectName:    projectName,
-		},
-		nil
+	return deployer, nil
 }
 
 // Deploy deploys a project and map each port to a domain
@@ -53,9 +52,7 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 
 	d.logger.Debug().Msg("getting nodes with free resources")
 
-	filter := constructNodeFilter()
-
-	nodes, _, err := d.tfPluginClient.GridProxyClient.Nodes(filter, types.Limit{})
+	node, err := findNode(d.tfPluginClient.GridProxyClient)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(
 			err,
@@ -63,11 +60,6 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 			d.tfPluginClient.Network,
 		)
 	}
-	if len(nodes) == 0 {
-		return map[uint]string{}, fmt.Errorf("no node with free resources available on %s", d.tfPluginClient.Network)
-	}
-
-	node := uint32(nodes[0].NodeID)
 
 	d.logger.Info().Msg("deploying network")
 	network := constructNetwork(d.projectName, node)
@@ -122,10 +114,7 @@ func (d *Deployer) Destroy() error {
 	if err != nil {
 		return errors.Wrapf(err, "could not load contracts for project %s", d.projectName)
 	}
-	contractsSlice := make([]graphql.Contract, 0)
-	contractsSlice = append(contractsSlice, contracts.NameContracts...)
-	contractsSlice = append(contractsSlice, contracts.NodeContracts...)
-	// TODO: cancel each contract in a separate goroutine
+	contractsSlice := append(contracts.NameContracts, contracts.NodeContracts...)
 	for _, contract := range contractsSlice {
 		contractID, err := strconv.ParseUint(contract.ContractID, 0, 64)
 		if err != nil {
@@ -140,4 +129,14 @@ func (d *Deployer) Destroy() error {
 	}
 	d.logger.Info().Msg("Project Destroyed!")
 	return nil
+}
+
+func (d *Deployer) getProjectName() (string, error) {
+
+	splitURL := strings.Split(string(d.repoURL), "/")
+	projectName, _, found := strings.Cut(splitURL[len(splitURL)-1], ".git")
+	if !found {
+		return "", fmt.Errorf("couldn't get project name")
+	}
+	return projectName, nil
 }

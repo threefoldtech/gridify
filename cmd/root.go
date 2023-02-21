@@ -4,6 +4,8 @@ package cmd
 import (
 	"os"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -23,6 +25,10 @@ func Execute() {
 }
 
 func init() {
+	log.Logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).Level(zerolog.InfoLevel).
+		With().
+		Timestamp().
+		Logger()
 
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "show debug level logs")
 }
