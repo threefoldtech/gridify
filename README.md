@@ -7,8 +7,8 @@ Clone the repo and run the following command inside the repo directory:
 go build .
 ```
 ## Requirements
--  gridify uses [ginit](https://github.com/rawdaGastan/ginit) so `.Procfile` and `.env` must exist in root directory of your project
--  the project github repository must be public
+  - gridify uses [ginit](https://github.com/rawdaGastan/ginit) so `.Procfile` and `.env` must exist in root directory of your project
+  - the project github repository must be public
 
 ## Usage
 First [Build](#build) gridify then move the binary to any of $PATH directories, for example:
@@ -35,8 +35,8 @@ gridify destroy
 See [gridify-demo](https://github.com/AbdelrahmanElawady/gridify-demo)
 
 ## Supported Projects Languages and Tools
--  go 1.18
--  python 3.10.10
--  node 16.17.1
--  npm 8.10.0
--  caddy
+  - go 1.18
+  - python 3.10.10
+  - node 16.17.1
+  - npm 8.10.0
+  - caddy
