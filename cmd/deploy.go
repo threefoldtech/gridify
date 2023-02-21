@@ -73,5 +73,9 @@ func init() {
 	rootCmd.AddCommand(deployCmd)
 
 	deployCmd.Flags().UintSliceP("ports", "p", []uint{}, "ports to forward the FQDNs to")
-	deployCmd.MarkFlagRequired("ports")
+	err := deployCmd.MarkFlagRequired("ports")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
