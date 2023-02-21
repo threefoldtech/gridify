@@ -28,6 +28,10 @@ var loginCmd = &cobra.Command{
 			return err
 		}
 		mnemonics = strings.TrimSpace(mnemonics)
+		if !bip39.IsMnemonicValid(mnemonics) {
+			log.Error().Msg("failed to validate mnemonics")
+			return errors.New("login failed")
+		}
 
 		fmt.Print("Please enter grid network: ")
 		network, err := scanner.ReadString('\n')
@@ -37,13 +41,9 @@ var loginCmd = &cobra.Command{
 		}
 		network = strings.TrimSpace(network)
 
-		if !bip39.IsMnemonicValid(mnemonics) {
-			log.Error().Msg("failed to validate mnemonics")
-			return errors.New("validation failed")
-		}
 		if network != "dev" && network != "qa" && network != "test" && network != "main" {
 			log.Error().Msg("invalid network, must be one of: dev, test, qa and main")
-			return errors.New("validation failed")
+			return errors.New("login failed")
 		}
 
 		err = config.SaveConfigData(mnemonics, network)

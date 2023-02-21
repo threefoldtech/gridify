@@ -35,6 +35,16 @@ Use `gridify` to deploy your project and specify the ports you want gridify to a
 gridify deploy --ports <ports>
 ```
 
+ports are your services' ports defined in procfile
+
+for example:
+
+```bash
+gridify deploy --ports 80,8080
+```
+
+gridify generates a unique domain for each port.
+
 To destroy deployed projects run:
 
 ```bash

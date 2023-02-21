@@ -81,9 +81,6 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 	}
 
 	portlessBackend := constructPortlessBackend(resVM.ComputedIP)
-	if err != nil {
-		return map[uint]string{}, errors.Wrapf(err, "could not construct backend for vm %s on node %d", dl.Name, node)
-	}
 
 	FQDNs := make(map[uint]string, 0)
 	// TODO: deploy each gateway in a separate goroutine
