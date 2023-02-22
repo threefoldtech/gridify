@@ -1,4 +1,4 @@
-// Package cmd for handling command line arguments
+// Package cmd for parsing command line arguments
 package cmd
 
 import (

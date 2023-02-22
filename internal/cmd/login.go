@@ -1,3 +1,4 @@
+// Package cmd for handling commands
 package cmd
 
 import (
@@ -7,11 +8,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cosmos/go-bip39"
+	bip39 "github.com/cosmos/go-bip39"
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
+// Login handles login command logic
 func Login(debug bool) error {
 	scanner := bufio.NewReader(os.Stdin)
 
@@ -45,7 +47,7 @@ func Login(debug bool) error {
 		return err
 	}
 
-	cfg := config.NewConfig()
+	var cfg config.Config
 	cfg.Mnemonics = mnemonics
 	cfg.Network = network
 

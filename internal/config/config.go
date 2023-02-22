@@ -17,10 +17,6 @@ type Config struct {
 	Network   string `json:"network"`
 }
 
-func NewConfig() Config {
-	return Config{}
-}
-
 // Save saves user configuration to gridify configuration file
 func (c *Config) Save(path string) error {
 
@@ -57,6 +53,7 @@ func (c *Config) Load(path string) error {
 	return nil
 }
 
+// GetConfigPath returns the path of gridify configuration file
 func GetConfigPath() (string, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {

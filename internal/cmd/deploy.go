@@ -1,3 +1,4 @@
+// Package cmd for handling commands
 package cmd
 
 import (
@@ -11,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// Deploy handles deploy command logic
 func Deploy(ports []uint, debug bool) error {
 
 	path, err := config.GetConfigPath()
@@ -18,7 +20,7 @@ func Deploy(ports []uint, debug bool) error {
 		log.Error().Err(err).Msg("failed to get configuration file")
 		return err
 	}
-	cfg := config.NewConfig()
+	var cfg config.Config
 	err = cfg.Load(path)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load configuration try logging again using gridify login")
