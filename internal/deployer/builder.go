@@ -6,7 +6,6 @@ import (
 	"net"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/threefoldtech/grid3-go/workloads"
 	"github.com/threefoldtech/grid_proxy_server/pkg/client"
 	"github.com/threefoldtech/grid_proxy_server/pkg/types"
@@ -17,18 +16,21 @@ import (
 var (
 	vmFlist      = "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist"
 	vmCPU        = 2
-	vmMemory     = 2 * 1024
-	vmRootfsSize = 5 * 1024
+	vmMemory     = 2 // GB
+	vmRootfsSize = 5 // GB
 	vmEntrypoint = "/init.sh"
 	vmPublicIP   = true
 	vmPlanetary  = true
 )
 
-func constructNodeFilter() types.NodeFilter {
+func buildNodeFilter() types.NodeFilter {
 	nodeStatus := "up"
-	freeMRU := uint64(2)
-	freeHRU := uint64(5)
-	freeIPs := uint64(1)
+	freeMRU := uint64(vmMemory)
+	freeHRU := uint64(vmRootfsSize)
+	freeIPs := uint64(0)
+	if vmPublicIP {
+		freeIPs = 1
+	}
 	domain := true
 
 	filter := types.NodeFilter{
@@ -43,20 +45,20 @@ func constructNodeFilter() types.NodeFilter {
 }
 
 func findNode(gridProxyClient client.Client) (uint32, error) {
-	filter := constructNodeFilter()
+	filter := buildNodeFilter()
 	nodes, _, err := gridProxyClient.Nodes(filter, types.Limit{})
 	if err != nil {
 		return 0, err
 	}
 	if len(nodes) == 0 {
-		return 0, errors.New("no node with free resources available")
+		return 0, fmt.Errorf("no node with free resources available using node filter %v", filter)
 	}
 
 	node := uint32(nodes[0].NodeID)
 	return node, nil
 }
 
-func constructNetwork(projectName string, node uint32) workloads.ZNet {
+func buildNetwork(projectName string, node uint32) workloads.ZNet {
 	networkName := randString(10)
 	network := workloads.ZNet{
 		Name:  networkName,
@@ -70,7 +72,7 @@ func constructNetwork(projectName string, node uint32) workloads.ZNet {
 	return network
 }
 
-func constructDeployment(networkName, projectName, repoURL string, node uint32) workloads.Deployment {
+func buildDeployment(networkName, projectName, repoURL string, node uint32) workloads.Deployment {
 	vmName := randString(10)
 	vm := workloads.VM{
 		Name:       vmName,
@@ -78,8 +80,8 @@ func constructDeployment(networkName, projectName, repoURL string, node uint32) 
 		CPU:        vmCPU,
 		PublicIP:   vmPublicIP,
 		Planetary:  vmPlanetary,
-		Memory:     vmMemory,
-		RootfsSize: vmRootfsSize,
+		Memory:     vmMemory * 1024,
+		RootfsSize: vmRootfsSize * 1024,
 		Entrypoint: vmEntrypoint,
 		EnvVars: map[string]string{
 			"REPO_URL": repoURL,
@@ -91,7 +93,7 @@ func constructDeployment(networkName, projectName, repoURL string, node uint32) 
 	return dl
 }
 
-func constructGateway(backend, projectName string, node uint32) workloads.GatewayNameProxy {
+func buildGateway(backend, projectName string, node uint32) workloads.GatewayNameProxy {
 	subdomain := randString(10)
 	gateway := workloads.GatewayNameProxy{
 		NodeID:       node,
@@ -102,7 +104,7 @@ func constructGateway(backend, projectName string, node uint32) workloads.Gatewa
 	return gateway
 }
 
-func constructPortlessBackend(ip string) string {
+func buildPortlessBackend(ip string) string {
 	publicIP := strings.Split(ip, "/")[0]
 	backend := fmt.Sprintf("http://%s", publicIP)
 	return backend

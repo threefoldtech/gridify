@@ -62,14 +62,14 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 	}
 
 	d.logger.Info().Msg("deploying network")
-	network := constructNetwork(d.projectName, node)
+	network := buildNetwork(d.projectName, node)
 	err = d.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy network %s on node %d", network.Name, node)
 	}
 
 	d.logger.Info().Msg("deploying vm")
-	dl := constructDeployment(network.Name, d.projectName, d.repoURL, node)
+	dl := buildDeployment(network.Name, d.projectName, d.repoURL, node)
 	err = d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy vm %s on node %d", dl.Name, node)
@@ -80,14 +80,14 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 		return map[uint]string{}, errors.Wrapf(err, "could not load vm %s on node %d", dl.Name, node)
 	}
 
-	portlessBackend := constructPortlessBackend(resVM.ComputedIP)
+	portlessBackend := buildPortlessBackend(resVM.ComputedIP)
 
 	FQDNs := make(map[uint]string, 0)
 	// TODO: deploy each gateway in a separate goroutine
 	for _, port := range ports {
 		backend := fmt.Sprintf("%s:%d", portlessBackend, port)
 		d.logger.Info().Msgf("deploying gateway for port %d", port)
-		gateway := constructGateway(backend, d.projectName, node)
+		gateway := buildGateway(backend, d.projectName, node)
 		err := d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gateway)
 		if err != nil {
 			return map[uint]string{}, errors.Wrapf(err, "could not deploy gateway %s on node %d", gateway.Name, node)
