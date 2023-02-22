@@ -2,7 +2,9 @@
 package cmd
 
 import (
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -29,6 +31,8 @@ func init() {
 		With().
 		Timestamp().
 		Logger()
+
+	rand.Seed(time.Now().UnixNano())
 
 	rootCmd.PersistentFlags().BoolP("debug", "d", false, "show debug level logs")
 }

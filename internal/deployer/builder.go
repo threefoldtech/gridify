@@ -59,7 +59,7 @@ func findNode(gridProxyClient client.Client) (uint32, error) {
 }
 
 func buildNetwork(projectName string, node uint32) workloads.ZNet {
-	networkName := randString(10)
+	networkName := randName(10)
 	network := workloads.ZNet{
 		Name:  networkName,
 		Nodes: []uint32{node},
@@ -73,7 +73,7 @@ func buildNetwork(projectName string, node uint32) workloads.ZNet {
 }
 
 func buildDeployment(networkName, projectName, repoURL string, node uint32) workloads.Deployment {
-	vmName := randString(10)
+	vmName := randName(10)
 	vm := workloads.VM{
 		Name:       vmName,
 		Flist:      vmFlist,
@@ -94,7 +94,7 @@ func buildDeployment(networkName, projectName, repoURL string, node uint32) work
 }
 
 func buildGateway(backend, projectName string, node uint32) workloads.GatewayNameProxy {
-	subdomain := randString(10)
+	subdomain := randName(10)
 	gateway := workloads.GatewayNameProxy{
 		NodeID:       node,
 		Name:         subdomain,

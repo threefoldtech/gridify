@@ -4,10 +4,8 @@ package deployer
 import (
 	"context"
 	"fmt"
-	"math/rand"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
@@ -26,7 +24,6 @@ type Deployer struct {
 
 // NewDeployer return new project deployer
 func NewDeployer(mnemonics, network string, repoURL string, logger zerolog.Logger) (Deployer, error) {
-	rand.Seed(time.Now().UnixNano())
 
 	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", "", true, false)
 	if err != nil {
@@ -61,14 +58,14 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 		)
 	}
 
-	d.logger.Info().Msg("deploying network")
+	d.logger.Info().Msg("deploying a network")
 	network := buildNetwork(d.projectName, node)
 	err = d.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy network %s on node %d", network.Name, node)
 	}
 
-	d.logger.Info().Msg("deploying vm")
+	d.logger.Info().Msg("deploying a vm")
 	dl := buildDeployment(network.Name, d.projectName, d.repoURL, node)
 	err = d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
 	if err != nil {
@@ -82,11 +79,11 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 
 	portlessBackend := buildPortlessBackend(resVM.ComputedIP)
 
-	FQDNs := make(map[uint]string, 0)
+	FQDNs := make(map[uint]string)
 	// TODO: deploy each gateway in a separate goroutine
 	for _, port := range ports {
 		backend := fmt.Sprintf("%s:%d", portlessBackend, port)
-		d.logger.Info().Msgf("deploying gateway for port %d", port)
+		d.logger.Info().Msgf("deploying a gateway for port %d", port)
 		gateway := buildGateway(backend, d.projectName, node)
 		err := d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gateway)
 		if err != nil {
