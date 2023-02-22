@@ -11,7 +11,14 @@ import (
 )
 
 func Destroy(debug bool) error {
-	config, err := config.LoadConfigData()
+	path, err := config.GetConfigPath()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get configuration file")
+		return err
+	}
+
+	cfg := config.NewConfig()
+	err = cfg.Load(path)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load configuration try logging again using gridify login")
 		return err
@@ -33,7 +40,7 @@ func Destroy(debug bool) error {
 		Timestamp().
 		Logger()
 
-	deployer, err := deployer.NewDeployer(config.Mnemonics, config.Network, string(repoURL), logger)
+	deployer, err := deployer.NewDeployer(cfg.Mnemonics, cfg.Network, string(repoURL), logger)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return err

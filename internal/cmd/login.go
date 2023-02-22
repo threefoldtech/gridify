@@ -39,8 +39,17 @@ func Login(debug bool) error {
 		log.Error().Msg("invalid network, must be one of: dev, test, qa and main")
 		return errors.New("login failed")
 	}
+	path, err := config.GetConfigPath()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to get configuration file")
+		return err
+	}
 
-	err = config.SaveConfigData(mnemonics, network)
+	cfg := config.NewConfig()
+	cfg.Mnemonics = mnemonics
+	cfg.Network = network
+
+	err = cfg.Save(path)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return err

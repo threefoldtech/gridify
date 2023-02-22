@@ -17,22 +17,21 @@ type Config struct {
 	Network   string `json:"network"`
 }
 
-// SaveConfigData save user configuration to gridify configuration file
-func SaveConfigData(mnemonics, network string) error {
+func NewConfig() Config {
+	return Config{}
+}
 
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return errors.Wrap(err, "could not get configuration directory")
-	}
-	path := filepath.Join(configDir, configFile)
+// Save saves user configuration to gridify configuration file
+func (c *Config) Save(path string) error {
+
 	configFile, err := os.Create(path)
 	if err != nil {
 		return errors.Wrapf(err, "could not create configuration file %s", path)
 	}
 	defer configFile.Close()
 	config := Config{
-		Mnemonics: mnemonics,
-		Network:   network,
+		Mnemonics: c.Mnemonics,
+		Network:   c.Network,
 	}
 	configJSON, err := json.Marshal(config)
 	if err != nil {
@@ -45,21 +44,24 @@ func SaveConfigData(mnemonics, network string) error {
 	return nil
 }
 
-// LoadConfigData loads user configuration from gridify configuration file
-func LoadConfigData() (Config, error) {
-	configDir, err := os.UserConfigDir()
-	if err != nil {
-		return Config{}, errors.Wrap(err, "could not get configuration directory")
-	}
-	path := filepath.Join(configDir, configFile)
+// Load loads user configuration from gridify configuration file
+func (c *Config) Load(path string) error {
 	configJSON, err := os.ReadFile(path)
 	if err != nil {
-		return Config{}, errors.Wrapf(err, "could not read configuration file %s", path)
+		return errors.Wrapf(err, "could not read configuration file %s", path)
 	}
-	var config Config
-	err = json.Unmarshal(configJSON, &config)
+	err = json.Unmarshal(configJSON, &c)
 	if err != nil {
-		return config, errors.Wrapf(err, "could not unmarshal configuration data %s", configJSON)
+		return errors.Wrapf(err, "could not unmarshal configuration data %s", configJSON)
 	}
-	return config, nil
+	return nil
+}
+
+func GetConfigPath() (string, error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", errors.Wrap(err, "could not get configuration directory")
+	}
+	path := filepath.Join(configDir, configFile)
+	return path, nil
 }
