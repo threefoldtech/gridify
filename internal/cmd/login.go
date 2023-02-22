@@ -29,16 +29,16 @@ func Login(debug bool) error {
 		return errors.New("login failed")
 	}
 
-	fmt.Print("Please enter grid network: ")
+	fmt.Print("Please enter grid network (main,test): ")
 	network, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Error().Err(err).Msg("failed to read network")
+		log.Error().Err(err).Msg("failed to read grid network")
 		return err
 	}
 	network = strings.TrimSpace(network)
 
 	if network != "dev" && network != "qa" && network != "test" && network != "main" {
-		log.Error().Msg("invalid network, must be one of: dev, test, qa and main")
+		log.Error().Msg("invalid grid network, must be one of: dev, test, qa and main")
 		return errors.New("login failed")
 	}
 	path, err := config.GetConfigPath()

@@ -22,7 +22,7 @@ func Destroy(debug bool) error {
 	var cfg config.Config
 	err = cfg.Load(path)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to load configuration try logging again using gridify login")
+		log.Error().Err(err).Msg("failed to load configuration try to login again using gridify login")
 		return err
 	}
 

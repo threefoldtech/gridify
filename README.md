@@ -1,6 +1,6 @@
 # Gridify
 
-A tool used to deploy projects using [Threefold grid](https://threefold.io/).
+A tool used to deploy projects on [Threefold grid](https://threefold.io/).
 
 ## Usage
 
