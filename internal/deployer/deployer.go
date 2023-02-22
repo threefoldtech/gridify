@@ -1,96 +1,136 @@
+// Package deployer for project deployment
 package deployer
 
 import (
 	"context"
 	"fmt"
-	"log"
-	"net"
-	"os"
+	"strconv"
 	"strings"
-	"time"
 
+	"github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
-	"github.com/threefoldtech/grid3-go/workloads"
-	"github.com/threefoldtech/zos/pkg/gridtypes"
 )
 
-type deployer struct {
+// Deployer struct manages project deployment
+type Deployer struct {
 	tfPluginClient *gridDeployer.TFPluginClient
+
+	repoURL     string
+	projectName string
+
+	logger zerolog.Logger
 }
 
-func NewDeployer() deployer {
-	mnemonics := os.Getenv("MNEMONICS")
-	log.Printf("mnemonics: %s", mnemonics)
+// NewDeployer return new project deployer
+func NewDeployer(mnemonics, network string, repoURL string, logger zerolog.Logger) (Deployer, error) {
 
-	network := os.Getenv("NETWORK")
-	log.Printf("network: %s", network)
-
-	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", true, false)
+	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", "", true, false)
 	if err != nil {
-		return deployer{}
+		return Deployer{}, err
 	}
-	return deployer{tfPluginClient: &tfPluginClient}
+	deployer := Deployer{
+		tfPluginClient: &tfPluginClient,
+		logger:         logger,
+		repoURL:        repoURL,
+	}
+
+	projectName, err := deployer.getProjectName()
+	if err != nil {
+		return Deployer{}, err
+	}
+	deployer.projectName = projectName
+
+	return deployer, nil
 }
 
-func (b *deployer) Deploy(ctx context.Context, repoURL string) (string, error) {
-	network := workloads.ZNet{
-		Name:        "gridifyNetwork",
-		Description: "network for testing",
-		Nodes:       []uint32{3},
-		IPRange: gridtypes.NewIPNet(net.IPNet{
-			IP:   net.IPv4(10, 20, 0, 0),
-			Mask: net.CIDRMask(16, 32),
-		}),
-		AddWGAccess: false,
-	}
+// Deploy deploys a project and map each port to a domain
+func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, error) {
 
-	vm := workloads.VM{
-		Name:       "gridifyVM",
-		Flist:      "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist",
-		CPU:        2,
-		PublicIP:   true,
-		Planetary:  true,
-		Memory:     1024,
-		RootfsSize: 20 * 1024,
-		Entrypoint: "/sbin/zinit init",
-		EnvVars: map[string]string{
-			"REPO_URL": repoURL,
-		},
-		NetworkName: network.Name,
-	}
+	d.logger.Debug().Msg("getting nodes with free resources")
 
-	err := b.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
+	node, err := findNode(d.tfPluginClient.GridProxyClient)
 	if err != nil {
-		return "", err
+		return map[uint]string{}, errors.Wrapf(
+			err,
+			"failed to get a node with enough resources on network %s",
+			d.tfPluginClient.Network,
+		)
 	}
 
-	dl := workloads.NewDeployment("gridifyVM", 3, "", nil, network.Name, nil, nil, []workloads.VM{vm}, nil)
-	err = b.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
-
+	d.logger.Info().Msg("deploying a network")
+	network := buildNetwork(d.projectName, node)
+	err = d.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
 	if err != nil {
-		return "", err
+		return map[uint]string{}, errors.Wrapf(err, "could not deploy network %s on node %d", network.Name, node)
 	}
 
-	resVM, err := b.tfPluginClient.StateLoader.LoadVMFromGrid(3, "gridifyVM")
+	d.logger.Info().Msg("deploying a vm")
+	dl := buildDeployment(network.Name, d.projectName, d.repoURL, node)
+	err = d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
 	if err != nil {
-		return "", err
+		return map[uint]string{}, errors.Wrapf(err, "could not deploy vm %s on node %d", dl.Name, node)
 	}
 
-	publicIP := strings.Split(resVM.ComputedIP, "/")[0]
-	if !testConnection(publicIP, "22") {
-		return "", fmt.Errorf("public ip %s is not reachable", publicIP)
+	resVM, err := d.tfPluginClient.State.LoadVMFromGrid(node, dl.Name, dl.Name)
+	if err != nil {
+		return map[uint]string{}, errors.Wrapf(err, "could not load vm %s on node %d", dl.Name, node)
 	}
 
-	return publicIP, nil
+	portlessBackend := buildPortlessBackend(resVM.ComputedIP)
+
+	FQDNs := make(map[uint]string)
+	// TODO: deploy each gateway in a separate goroutine
+	for _, port := range ports {
+		backend := fmt.Sprintf("%s:%d", portlessBackend, port)
+		d.logger.Info().Msgf("deploying a gateway for port %d", port)
+		gateway := buildGateway(backend, d.projectName, node)
+		err := d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gateway)
+		if err != nil {
+			return map[uint]string{}, errors.Wrapf(err, "could not deploy gateway %s on node %d", gateway.Name, node)
+		}
+		resGateway, err := d.tfPluginClient.State.LoadGatewayNameFromGrid(node, gateway.Name, gateway.Name)
+		if err != nil {
+			return map[uint]string{}, errors.Wrapf(err, "could not load gateway %s on node %d", gateway.Name, node)
+		}
+		FQDNs[port] = resGateway.FQDN
+	}
+
+	d.logger.Info().Msg("Project Deployed!")
+
+	return FQDNs, nil
 }
 
-func testConnection(addr string, port string) bool {
-	for t := time.Now(); time.Since(t) < 3*time.Minute; {
-		con, err := net.DialTimeout("tcp", net.JoinHostPort(addr, port), time.Second*12)
-		if err == nil {
-			con.Close()
-			return true
+// Destroy destroys all the contracts of a project
+func (d *Deployer) Destroy() error {
+	d.logger.Info().Msgf("canceling contracts for project %s", d.projectName)
+	contracts, err := d.tfPluginClient.ContractsGetter.ListContractsOfProjectName(d.projectName)
+	if err != nil {
+		return errors.Wrapf(err, "could not load contracts for project %s", d.projectName)
+	}
+	contractsSlice := append(contracts.NameContracts, contracts.NodeContracts...)
+	for _, contract := range contractsSlice {
+		contractID, err := strconv.ParseUint(contract.ContractID, 0, 64)
+		if err != nil {
+			return errors.Wrapf(err, "could not parse contract %s into uint64", contract.ContractID)
+		}
+		d.logger.Debug().Msgf("canceling contract %d", contractID)
+
+		err = d.tfPluginClient.SubstrateConn.CancelContract(d.tfPluginClient.Identity, contractID)
+		if err != nil {
+			return errors.Wrapf(err, "could not cancel contract %d", contractID)
 		}
 	}
-	return false
+	d.logger.Info().Msg("Project Destroyed!")
+	return nil
+}
+
+func (d *Deployer) getProjectName() (string, error) {
+
+	splitURL := strings.Split(string(d.repoURL), "/")
+	projectName, _, found := strings.Cut(splitURL[len(splitURL)-1], ".git")
+	if !found {
+		return "", fmt.Errorf("couldn't get project name")
+	}
+	return projectName, nil
 }

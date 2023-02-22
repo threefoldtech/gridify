@@ -50,3 +50,7 @@ spelling:
 staticcheck:
 	@echo "Running $@"
 	@${GOPATH}/bin/staticcheck -- ./...
+
+build:
+	@echo "Running $@"
+	@go build -o gridify main.go

@@ -1,2 +1,79 @@
-# gridify
-A tool used to deploy projects using threefold grid 3 
+# Gridify
+
+A tool used to deploy projects on [Threefold grid](https://threefold.io/).
+
+## Usage
+
+First [Build](#build) gridify then move the binary to any of `$PATH` directories, for example:
+
+```bash
+mv gridify /usr/local/bin
+```
+
+Login using your [mnemonics](https://threefoldtech.github.io/info_grid/dashboard/portal/dashboard_portal_polkadot_create_account.html) and specify which grid network (mainnet/testnet) to deploy on by running:
+
+```bash
+gridify login
+```
+
+Use `gridify` to deploy your project and specify the ports you want gridify to assign domains to:
+
+```bash
+gridify deploy --ports <ports>
+```
+
+ports are your services' ports defined in Procfile
+
+for example:
+
+```bash
+gridify deploy --ports 80,8080
+```
+
+gridify generates a unique domain for each service.
+
+To destroy deployed project run the following command inside the project directory:
+
+```bash
+gridify destroy
+```
+
+## Configuration
+
+Gridify saves user configuration in `.gridifyconfig` under default configuration directory for your system see: [UserConfigDir()](https://pkg.go.dev/os#UserConfigDir)
+
+## Requirements
+
+- [git](https://git-scm.com/) installed
+- gridify uses [ginit](https://github.com/rawdaGastan/ginit) so Procfile and env must exist in root directory of your project see: [Demo](#gridify-demo-project)
+- the project github repository must be public
+
+## Gridify Demo Project
+
+See [gridify-demo](https://github.com/AbdelrahmanElawady/gridify-demo)
+
+In this demo gridify deploys a VM with [flist](https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist.md) that clones the demo project and run each service defined in Procfile. Then, gridify assign a domain for each service.
+
+## Supported Projects Languages and Tools
+
+- go 1.18
+- python 3.10.10
+- node 16.17.1
+- npm 8.10.0
+- caddy
+
+## Testing
+
+For unittests run:
+
+```bash
+make test
+```
+
+## Build
+
+Clone the repo and run the following command inside the repo directory:
+
+```bash
+make build
+```
