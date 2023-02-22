@@ -10,7 +10,7 @@ First [Build](#build) gridify then move the binary to any of `$PATH` directories
 mv gridify /usr/local/bin
 ```
 
-Login using your mnemonics and specify which grid network to deploy on by running:
+Login using your [mnemonics](https://threefoldtech.github.io/info_grid/dashboard/portal/dashboard_portal_polkadot_create_account.html) and specify which grid network (mainnet/testnet) to deploy on by running:
 
 ```bash
 gridify login
