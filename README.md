@@ -1,23 +1,10 @@
 # Gridify
 
-A tool used to deploy projects using threefold grid 3.
-
-## Build
-
-Clone the repo and run the following command inside the repo directory:
-
-```bash
-make build
-```
-
-## Requirements
-
-- gridify uses [ginit](https://github.com/rawdaGastan/ginit) so `.Procfile` and `.env` must exist in root directory of your project
-- the project github repository must be public
+A tool used to deploy projects using [Threefold grid](https://threefold.io/).
 
 ## Usage
 
-First [Build](#build) gridify then move the binary to any of $PATH directories, for example:
+First [Build](#build) gridify then move the binary to any of `$PATH` directories, for example:
 
 ```bash
 mv gridify /usr/local/bin
@@ -35,7 +22,7 @@ Use `gridify` to deploy your project and specify the ports you want gridify to a
 gridify deploy --ports <ports>
 ```
 
-ports are your services' ports defined in procfile
+ports are your services' ports defined in Procfile
 
 for example:
 
@@ -43,17 +30,29 @@ for example:
 gridify deploy --ports 80,8080
 ```
 
-gridify generates a unique domain for each port.
+gridify generates a unique domain for each service.
 
-To destroy deployed projects run:
+To destroy deployed project run the following command inside the project directory:
 
 ```bash
 gridify destroy
 ```
 
-## Demo
+## Configuration
+
+Gridify saves user configuration in `.gridifyconfig` under default configuration directory for your system see: [UserConfigDir()](https://pkg.go.dev/os#UserConfigDir)
+
+## Requirements
+
+- [git](https://git-scm.com/) installed
+- gridify uses [ginit](https://github.com/rawdaGastan/ginit) so Procfile and env must exist in root directory of your project see: [Demo](#gridify-demo-project)
+- the project github repository must be public
+
+## Gridify Demo Project
 
 See [gridify-demo](https://github.com/AbdelrahmanElawady/gridify-demo)
+
+In this demo gridify deploys a VM with [flist](https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist.md) that clones the demo project and run each service defined in Procfile. Then, gridify assign a domain for each service.
 
 ## Supported Projects Languages and Tools
 
@@ -65,8 +64,16 @@ See [gridify-demo](https://github.com/AbdelrahmanElawady/gridify-demo)
 
 ## Testing
 
-Run:
+For unittests run:
 
 ```bash
 make test
+```
+
+## Build
+
+Clone the repo and run the following command inside the repo directory:
+
+```bash
+make build
 ```
