@@ -4,7 +4,6 @@ RUN apk add --no-cache git make musl-dev go
 RUN apk add --update nodejs npm
 
 RUN apk add caddy
-RUN caddy start
 
 RUN apk add python3 py3-pip
 

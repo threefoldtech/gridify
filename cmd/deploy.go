@@ -4,7 +4,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/rawdaGastan/gridify/internal/cmd"
+	command "github.com/rawdaGastan/gridify/internal/cmd"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -13,7 +13,21 @@ import (
 var deployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy the project in the current directory on threefold grid",
-	RunE:  cmd.Deploy,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		ports, err := cmd.Flags().GetUintSlice("ports")
+		if err != nil {
+			log.Error().Err(err).Send()
+			return err
+		}
+
+		debug, err := cmd.Flags().GetBool("debug")
+		if err != nil {
+			log.Error().Err(err).Send()
+			return err
+		}
+
+		return command.Deploy(ports, debug)
+	},
 }
 
 func init() {

@@ -9,15 +9,9 @@ import (
 	"github.com/rawdaGastan/gridify/internal/deployer"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-func Deploy(cmd *cobra.Command, args []string) error {
-	ports, err := cmd.Flags().GetUintSlice("ports")
-	if err != nil {
-		log.Error().Err(err).Send()
-		return err
-	}
+func Deploy(ports []uint, debug bool) error {
 
 	config, err := config.LoadConfigData()
 	if err != nil {
@@ -32,11 +26,6 @@ func Deploy(cmd *cobra.Command, args []string) error {
 	}
 
 	logLevel := zerolog.InfoLevel
-	debug, err := cmd.Flags().GetBool("debug")
-	if err != nil {
-		log.Error().Err(err).Send()
-		return err
-	}
 	if debug {
 		logLevel = zerolog.DebugLevel
 	}

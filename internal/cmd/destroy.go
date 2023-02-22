@@ -8,10 +8,9 @@ import (
 	"github.com/rawdaGastan/gridify/internal/deployer"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-func Destroy(cmd *cobra.Command, args []string) error {
+func Destroy(debug bool) error {
 	config, err := config.LoadConfigData()
 	if err != nil {
 		log.Error().Err(err).Msg("failed to load configuration try logging again using gridify login")
@@ -25,11 +24,6 @@ func Destroy(cmd *cobra.Command, args []string) error {
 	}
 
 	logLevel := zerolog.InfoLevel
-	debug, err := cmd.Flags().GetBool("debug")
-	if err != nil {
-		log.Error().Err(err).Send()
-		return err
-	}
 	if debug {
 		logLevel = zerolog.DebugLevel
 	}

@@ -10,10 +10,9 @@ import (
 	"github.com/cosmos/go-bip39"
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
 )
 
-func Login(cmd *cobra.Command, args []string) error {
+func Login(debug bool) error {
 	scanner := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Please enter your mnemonics: ")
