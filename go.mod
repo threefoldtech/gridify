@@ -8,7 +8,7 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 	github.com/threefoldtech/grid3-go v0.0.0-20230221124527-658173dcf28b
-	github.com/threefoldtech/grid_proxy_server v1.6.6
+	github.com/threefoldtech/grid_proxy_server v1.6.12
 	github.com/threefoldtech/zos v0.5.6-0.20230103093557-d9c7fe2b92e7
 )
 
