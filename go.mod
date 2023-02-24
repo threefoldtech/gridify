@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
 	github.com/threefoldtech/grid3-go v0.0.0-20230221124527-658173dcf28b
 	github.com/threefoldtech/grid_proxy_server v1.6.6
