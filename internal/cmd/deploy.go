@@ -4,10 +4,11 @@ package cmd
 import (
 	"context"
 	"os"
-	"os/exec"
 
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rawdaGastan/gridify/internal/deployer"
+	"github.com/rawdaGastan/gridify/internal/repository"
+	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -27,7 +28,7 @@ func Deploy(ports []uint, debug bool) error {
 		return err
 	}
 
-	repoURL, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
+	repoURL, err := repository.GetRepositoryURL(".")
 	if err != nil {
 		log.Error().Err(err).Msg("failed to get remote repository url")
 		return err
@@ -43,7 +44,14 @@ func Deploy(ports []uint, debug bool) error {
 		Timestamp().
 		Logger()
 
-	deployer, err := deployer.NewDeployer(cfg.Mnemonics, cfg.Network, string(repoURL), logger)
+	tfPluginClient, err := tfplugin.NewTFPluginClient(cfg.Mnemonics, cfg.Network)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Msgf("failed to get threefold plugin client using mnemonics: '%s' on grid network '%s'", cfg.Mnemonics, cfg.Network)
+		return err
+	}
+	deployer, err := deployer.NewDeployer(&tfPluginClient, string(repoURL), logger)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return err

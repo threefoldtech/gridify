@@ -8,13 +8,13 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/rs/zerolog"
-	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
 )
 
 // Deployer struct manages project deployment
 type Deployer struct {
-	tfPluginClient *gridDeployer.TFPluginClient
+	tfPluginClient tfplugin.TFPluginClientInterface
 
 	repoURL     string
 	projectName string
@@ -23,14 +23,10 @@ type Deployer struct {
 }
 
 // NewDeployer return new project deployer
-func NewDeployer(mnemonics, network string, repoURL string, logger zerolog.Logger) (Deployer, error) {
+func NewDeployer(tfPluginClient tfplugin.TFPluginClientInterface, repoURL string, logger zerolog.Logger) (Deployer, error) {
 
-	tfPluginClient, err := gridDeployer.NewTFPluginClient(mnemonics, "sr25519", network, "", "", "", true, false)
-	if err != nil {
-		return Deployer{}, err
-	}
 	deployer := Deployer{
-		tfPluginClient: &tfPluginClient,
+		tfPluginClient: tfPluginClient,
 		logger:         logger,
 		repoURL:        repoURL,
 	}
@@ -49,30 +45,30 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 
 	d.logger.Debug().Msg("getting nodes with free resources")
 
-	node, err := findNode(d.tfPluginClient.GridProxyClient)
+	node, err := findNode(d.tfPluginClient)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(
 			err,
 			"failed to get a node with enough resources on network %s",
-			d.tfPluginClient.Network,
+			d.tfPluginClient.GetGridNetwork(),
 		)
 	}
 
 	d.logger.Info().Msg("deploying a network")
 	network := buildNetwork(d.projectName, node)
-	err = d.tfPluginClient.NetworkDeployer.Deploy(ctx, &network)
+	err = d.tfPluginClient.DeployNetwork(ctx, &network)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy network %s on node %d", network.Name, node)
 	}
 
 	d.logger.Info().Msg("deploying a vm")
 	dl := buildDeployment(network.Name, d.projectName, d.repoURL, node)
-	err = d.tfPluginClient.DeploymentDeployer.Deploy(ctx, &dl)
+	err = d.tfPluginClient.DeployDeployment(ctx, &dl)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy vm %s on node %d", dl.Name, node)
 	}
 
-	resVM, err := d.tfPluginClient.State.LoadVMFromGrid(node, dl.Name, dl.Name)
+	resVM, err := d.tfPluginClient.LoadVMFromGrid(node, dl.Name, dl.Name)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not load vm %s on node %d", dl.Name, node)
 	}
@@ -85,11 +81,11 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 		backend := fmt.Sprintf("%s:%d", portlessBackend, port)
 		d.logger.Info().Msgf("deploying a gateway for port %d", port)
 		gateway := buildGateway(backend, d.projectName, node)
-		err := d.tfPluginClient.GatewayNameDeployer.Deploy(ctx, &gateway)
+		err := d.tfPluginClient.DeployGatewayName(ctx, &gateway)
 		if err != nil {
 			return map[uint]string{}, errors.Wrapf(err, "could not deploy gateway %s on node %d", gateway.Name, node)
 		}
-		resGateway, err := d.tfPluginClient.State.LoadGatewayNameFromGrid(node, gateway.Name, gateway.Name)
+		resGateway, err := d.tfPluginClient.LoadGatewayNameFromGrid(node, gateway.Name, gateway.Name)
 		if err != nil {
 			return map[uint]string{}, errors.Wrapf(err, "could not load gateway %s on node %d", gateway.Name, node)
 		}
@@ -104,7 +100,7 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 // Destroy destroys all the contracts of a project
 func (d *Deployer) Destroy() error {
 	d.logger.Info().Msgf("canceling contracts for project %s", d.projectName)
-	contracts, err := d.tfPluginClient.ContractsGetter.ListContractsOfProjectName(d.projectName)
+	contracts, err := d.tfPluginClient.ListContractsOfProjectName(d.projectName)
 	if err != nil {
 		return errors.Wrapf(err, "could not load contracts for project %s", d.projectName)
 	}
@@ -116,7 +112,7 @@ func (d *Deployer) Destroy() error {
 		}
 		d.logger.Debug().Msgf("canceling contract %d", contractID)
 
-		err = d.tfPluginClient.SubstrateConn.CancelContract(d.tfPluginClient.Identity, contractID)
+		err = d.tfPluginClient.CancelContract(contractID)
 		if err != nil {
 			return errors.Wrapf(err, "could not cancel contract %d", contractID)
 		}

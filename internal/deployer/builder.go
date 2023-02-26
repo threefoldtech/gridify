@@ -6,8 +6,8 @@ import (
 	"net"
 	"strings"
 
+	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/threefoldtech/grid3-go/workloads"
-	"github.com/threefoldtech/grid_proxy_server/pkg/client"
 	"github.com/threefoldtech/grid_proxy_server/pkg/types"
 	"github.com/threefoldtech/zos/pkg/gridtypes"
 	"github.com/threefoldtech/zos/pkg/gridtypes/zos"
@@ -44,14 +44,14 @@ func buildNodeFilter() types.NodeFilter {
 	return filter
 }
 
-func findNode(gridProxyClient client.Client) (uint32, error) {
+func findNode(tfPluginClient tfplugin.TFPluginClientInterface) (uint32, error) {
 	filter := buildNodeFilter()
-	nodes, _, err := gridProxyClient.Nodes(filter, types.Limit{})
+	nodes, _, err := tfPluginClient.FilterNodes(filter, types.Limit{})
 	if err != nil {
 		return 0, err
 	}
 	if len(nodes) == 0 {
-		return 0, fmt.Errorf("no node with free resources available using node filter %v", filter)
+		return 0, fmt.Errorf("no node with free resources available using node filter %+v", filter)
 	}
 
 	node := uint32(nodes[0].NodeID)

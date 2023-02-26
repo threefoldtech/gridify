@@ -1,5 +1,7 @@
 # Gridify
 
+<a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-92%25-brightgreen.svg?longCache=true&style=flat)</a>
+
 A tool used to deploy projects on [Threefold grid](https://threefold.io/).
 
 ## Usage
@@ -44,7 +46,6 @@ Gridify saves user configuration in `.gridifyconfig` under default configuration
 
 ## Requirements
 
-- [git](https://git-scm.com/) installed
 - gridify uses [ginit](https://github.com/rawdaGastan/ginit) so Procfile and env must exist in root directory of your project see: [Demo](#gridify-demo-project)
 - the project github repository must be public
 
