@@ -13,3 +13,5 @@ gridify
 *.out
 
 coverage
+
+dist/
