@@ -45,7 +45,7 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 
 	d.logger.Debug().Msg("getting nodes with free resources")
 
-	node, err := findNode(d.tfPluginClient.GetGridProxyClient())
+	node, err := findNode(d.tfPluginClient)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(
 			err,
@@ -112,7 +112,7 @@ func (d *Deployer) Destroy() error {
 		}
 		d.logger.Debug().Msgf("canceling contract %d", contractID)
 
-		err = d.tfPluginClient.CancelContract(d.tfPluginClient.GetIdentity(), contractID)
+		err = d.tfPluginClient.CancelContract(contractID)
 		if err != nil {
 			return errors.Wrapf(err, "could not cancel contract %d", contractID)
 		}

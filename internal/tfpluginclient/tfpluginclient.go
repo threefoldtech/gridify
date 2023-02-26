@@ -6,8 +6,7 @@ import (
 	gridDeployer "github.com/threefoldtech/grid3-go/deployer"
 	"github.com/threefoldtech/grid3-go/graphql"
 	"github.com/threefoldtech/grid3-go/workloads"
-	"github.com/threefoldtech/grid_proxy_server/pkg/client"
-	"github.com/threefoldtech/substrate-client"
+	"github.com/threefoldtech/grid_proxy_server/pkg/types"
 )
 
 // TFPluginClientInterface interface for tfPluginClient
@@ -18,10 +17,9 @@ type TFPluginClientInterface interface {
 	LoadVMFromGrid(nodeID uint32, name string, deploymentName string) (workloads.VM, error)
 	LoadGatewayNameFromGrid(nodeID uint32, name string, deploymentName string) (workloads.GatewayNameProxy, error)
 	ListContractsOfProjectName(projectName string) (graphql.Contracts, error)
-	CancelContract(identity substrate.Identity, contractID uint64) error
+	CancelContract(contractID uint64) error
+	FilterNodes(filter types.NodeFilter, pagination types.Limit) (res []types.Node, totalCount int, err error)
 	GetGridNetwork() string
-	GetGridProxyClient() client.Client
-	GetIdentity() substrate.Identity
 }
 
 // NewTFPluginClient returns new tfPluginClient given mnemonics and grid network
@@ -71,21 +69,16 @@ func (t *tfPluginClient) ListContractsOfProjectName(projectName string) (graphql
 }
 
 // CancelContract cancels a contract on Threefold grid
-func (t *tfPluginClient) CancelContract(identity substrate.Identity, contractID uint64) error {
-	return t.tfPluginClient.SubstrateConn.CancelContract(identity, contractID)
+func (t *tfPluginClient) CancelContract(contractID uint64) error {
+	return t.tfPluginClient.SubstrateConn.CancelContract(t.tfPluginClient.Identity, contractID)
+}
+
+// FilterNodes retruns nodes that match the given filter
+func (t *tfPluginClient) FilterNodes(filter types.NodeFilter, pagination types.Limit) (res []types.Node, totalCount int, err error) {
+	return t.tfPluginClient.GridProxyClient.Nodes(filter, pagination)
 }
 
 // GetGridNetwork returns the current grid network
 func (t *tfPluginClient) GetGridNetwork() string {
 	return t.tfPluginClient.Network
-}
-
-// GetGridProxyClient returns grid proxy client
-func (t *tfPluginClient) GetGridProxyClient() client.Client {
-	return t.tfPluginClient.GridProxyClient
-}
-
-// GetIdentity returns the identity of the user
-func (t *tfPluginClient) GetIdentity() substrate.Identity {
-	return t.tfPluginClient.Identity
 }

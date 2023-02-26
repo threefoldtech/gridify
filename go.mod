@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/cosmos/go-bip39 v1.0.0
+	github.com/golang/mock v1.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
@@ -63,7 +64,7 @@ require (
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/threefoldtech/rmb-sdk-go v0.0.0-20230214123537-4833a4e157e6 // indirect
-	github.com/threefoldtech/substrate-client v0.1.2
+	github.com/threefoldtech/substrate-client v0.1.2 // indirect
 	github.com/vedhavyas/go-subkey v1.0.3 // indirect
 	golang.org/x/crypto v0.3.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
