@@ -51,7 +51,7 @@ func findNode(gridProxyClient client.Client) (uint32, error) {
 		return 0, err
 	}
 	if len(nodes) == 0 {
-		return 0, fmt.Errorf("no node with free resources available using node filter %v", filter)
+		return 0, fmt.Errorf("no node with free resources available using node filter %+v", filter)
 	}
 
 	node := uint32(nodes[0].NodeID)

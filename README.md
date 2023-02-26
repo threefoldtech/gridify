@@ -44,7 +44,6 @@ Gridify saves user configuration in `.gridifyconfig` under default configuration
 
 ## Requirements
 
-- [git](https://git-scm.com/) installed
 - gridify uses [ginit](https://github.com/rawdaGastan/ginit) so Procfile and env must exist in root directory of your project see: [Demo](#gridify-demo-project)
 - the project github repository must be public
 
