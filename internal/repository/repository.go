@@ -1,3 +1,4 @@
+// package repository for getting repository information
 package repository
 
 import (
@@ -6,8 +7,9 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
+// GetRepositoryURL returns the repository remote URL
 func GetRepositoryURL(path string) (string, error) {
-	repo, err := git.PlainOpen(".")
+	repo, err := git.PlainOpen(path)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to open repository ")
 

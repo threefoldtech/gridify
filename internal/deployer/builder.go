@@ -6,7 +6,7 @@ import (
 	"net"
 	"strings"
 
-	"github.com/rawdaGastan/gridify/internal/tfpluginclient"
+	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/threefoldtech/grid3-go/workloads"
 	"github.com/threefoldtech/grid_proxy_server/pkg/types"
 	"github.com/threefoldtech/zos/pkg/gridtypes"
@@ -44,7 +44,7 @@ func buildNodeFilter() types.NodeFilter {
 	return filter
 }
 
-func findNode(tfPluginClient tfpluginclient.TFPluginClientInterface) (uint32, error) {
+func findNode(tfPluginClient tfplugin.TFPluginClientInterface) (uint32, error) {
 	filter := buildNodeFilter()
 	nodes, _, err := tfPluginClient.FilterNodes(filter, types.Limit{})
 	if err != nil {

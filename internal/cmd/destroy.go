@@ -7,7 +7,7 @@ import (
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rawdaGastan/gridify/internal/deployer"
 	"github.com/rawdaGastan/gridify/internal/repository"
-	"github.com/rawdaGastan/gridify/internal/tfpluginclient"
+	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -43,7 +43,7 @@ func Destroy(debug bool) error {
 		Timestamp().
 		Logger()
 
-	tfPluginClient, err := tfpluginclient.NewTFPluginClient(cfg.Mnemonics, cfg.Network)
+	tfPluginClient, err := tfplugin.NewTFPluginClient(cfg.Mnemonics, cfg.Network)
 	if err != nil {
 		log.Error().
 			Err(err).

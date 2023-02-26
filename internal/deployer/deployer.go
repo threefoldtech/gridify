@@ -8,13 +8,13 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/rawdaGastan/gridify/internal/tfpluginclient"
+	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/rs/zerolog"
 )
 
 // Deployer struct manages project deployment
 type Deployer struct {
-	tfPluginClient tfpluginclient.TFPluginClientInterface
+	tfPluginClient tfplugin.TFPluginClientInterface
 
 	repoURL     string
 	projectName string
@@ -23,7 +23,7 @@ type Deployer struct {
 }
 
 // NewDeployer return new project deployer
-func NewDeployer(tfPluginClient tfpluginclient.TFPluginClientInterface, repoURL string, logger zerolog.Logger) (Deployer, error) {
+func NewDeployer(tfPluginClient tfplugin.TFPluginClientInterface, repoURL string, logger zerolog.Logger) (Deployer, error) {
 
 	deployer := Deployer{
 		tfPluginClient: tfPluginClient,

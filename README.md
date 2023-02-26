@@ -1,5 +1,7 @@
 # Gridify
 
+<a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-92%25-brightgreen.svg?longCache=true&style=flat)</a>
+
 A tool used to deploy projects on [Threefold grid](https://threefold.io/).
 
 ## Usage
