@@ -80,3 +80,10 @@ Clone the repo and run the following command inside the repo directory:
 ```bash
 make build
 ```
+
+## Release
+
+- Check: `goreleaser check`
+- Create a tag: `git tag -a v1.0.1 -m "release v1.0.1"`
+- Push the tag: `git push origin v1.0.1`
+- A goreleaser workflow will release the created tag.
