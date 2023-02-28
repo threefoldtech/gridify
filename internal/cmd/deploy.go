@@ -43,7 +43,7 @@ func Deploy(ports []uint, debug bool) error {
 
 	tfPluginClient, err := tfplugin.NewTFPluginClient(cfg.Mnemonics, cfg.Network)
 	if err != nil {
-		errors.Wrapf(err,
+		return errors.Wrapf(err,
 			"failed to get threefold plugin client using mnemonics: '%s' on grid network '%s'",
 			cfg.Mnemonics,
 			cfg.Network,
