@@ -3,6 +3,7 @@ package cmd
 
 import (
 	command "github.com/rawdaGastan/gridify/internal/cmd"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,10 @@ var destroyCmd = &cobra.Command{
 			return err
 		}
 
-		command.Destroy(debug)
+		err = command.Destroy(debug)
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
 		return nil
 	},
 }

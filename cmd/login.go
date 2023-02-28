@@ -3,6 +3,7 @@ package cmd
 
 import (
 	command "github.com/rawdaGastan/gridify/internal/cmd"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -16,7 +17,11 @@ var loginCmd = &cobra.Command{
 			return err
 		}
 
-		command.Login(debug)
+		err = command.Login(debug)
+
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
 		return nil
 	},
 }

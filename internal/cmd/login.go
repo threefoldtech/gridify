@@ -8,37 +8,38 @@ import (
 	"strings"
 
 	bip39 "github.com/cosmos/go-bip39"
+	"github.com/pkg/errors"
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rs/zerolog/log"
 )
 
 // Login handles login command logic
-func Login(debug bool) {
+func Login(debug bool) error {
 	scanner := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Please enter your mnemonics: ")
 	mnemonics, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to read mnemonics")
+		return errors.Wrap(err, "failed to read mnemonics")
 	}
 	mnemonics = strings.TrimSpace(mnemonics)
 	if !bip39.IsMnemonicValid(mnemonics) {
-		log.Fatal().Msg("failed to validate mnemonics")
+		return errors.New("failed to validate mnemonics")
 	}
 
 	fmt.Print("Please enter grid network (main,test): ")
 	network, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to read grid network")
+		return errors.Wrap(err, "failed to read grid network")
 	}
 	network = strings.TrimSpace(network)
 
 	if network != "dev" && network != "qa" && network != "test" && network != "main" {
-		log.Fatal().Msg("invalid grid network, must be one of: dev, test, qa and main")
+		return errors.New("invalid grid network, must be one of: dev, test, qa and main")
 	}
 	path, err := config.GetConfigPath()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to get configuration file")
+		return errors.Wrap(err, "failed to get configuration file")
 	}
 
 	var cfg config.Config
@@ -47,7 +48,8 @@ func Login(debug bool) {
 
 	err = cfg.Save(path)
 	if err != nil {
-		log.Fatal().Err(err).Send()
+		return err
 	}
 	log.Info().Msg("configuration saved")
+	return nil
 }

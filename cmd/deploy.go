@@ -24,7 +24,10 @@ var deployCmd = &cobra.Command{
 			return err
 		}
 
-		command.Deploy(ports, debug)
+		err = command.Deploy(ports, debug)
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
 		return nil
 	},
 }
