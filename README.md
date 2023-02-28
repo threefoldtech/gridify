@@ -6,11 +6,7 @@ A tool used to deploy projects on [Threefold grid](https://threefold.io/).
 
 ## Usage
 
-First [Build](#build) gridify then move the binary to any of `$PATH` directories, for example:
-
-```bash
-mv gridify /usr/local/bin
-```
+First [download](#download) gridify binaries.
 
 Login using your [mnemonics](https://threefoldtech.github.io/info_grid/dashboard/portal/dashboard_portal_polkadot_create_account.html) and specify which grid network (mainnet/testnet) to deploy on by running:
 
@@ -38,6 +34,16 @@ To destroy deployed project run the following command inside the project directo
 
 ```bash
 gridify destroy
+```
+
+## Download
+
+- Download the binaries from [releases](https://github.com/threefoldtech/gridify/releases)
+- Extract the downloaded files
+- Move the binary to any of `$PATH` directories, for example:
+
+```bash
+mv gridify /usr/local/bin
 ```
 
 ## Configuration
@@ -78,3 +84,10 @@ Clone the repo and run the following command inside the repo directory:
 ```bash
 make build
 ```
+
+## Release
+
+- Check: `goreleaser check`
+- Create a tag: `git tag -a v1.0.1 -m "release v1.0.1"`
+- Push the tag: `git push origin v1.0.1`
+- A goreleaser workflow will release the created tag.
