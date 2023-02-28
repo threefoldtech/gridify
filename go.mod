@@ -9,9 +9,9 @@ require (
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
-	github.com/threefoldtech/grid3-go v0.0.0-20230222165502-cc44722c8be8
+	github.com/threefoldtech/grid3-go v0.0.0-20230226130713-b717d9acb2da
 	github.com/threefoldtech/grid_proxy_server v1.6.12
-	github.com/threefoldtech/zos v0.5.6-0.20230222125149-23cfd55435b0
+	github.com/threefoldtech/zos v0.5.6-0.20230224113017-e887a6ca3fc5
 )
 
 require (
@@ -19,6 +19,7 @@ require (
 	github.com/ProtonMail/go-crypto v0.0.0-20221026131551-cf6655e29de4 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/cloudflare/circl v1.1.0 // indirect
+	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.1.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.4.0 // indirect
@@ -28,9 +29,9 @@ require (
 	github.com/pjbgf/sha1cd v0.2.3 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/skeema/knownhosts v1.1.0 // indirect
+	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.6.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
@@ -53,7 +54,7 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
-	github.com/hashicorp/go-multierror v1.0.0 // indirect
+	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -64,7 +65,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/threefoldtech/rmb-sdk-go v0.0.0-20230214123537-4833a4e157e6 // indirect
+	github.com/threefoldtech/rmb-sdk-go v0.0.0-20230222091305-4c05c096b592 // indirect
 	github.com/threefoldtech/substrate-client v0.1.2 // indirect
 	github.com/vedhavyas/go-subkey v1.0.3 // indirect
 	golang.org/x/crypto v0.3.0 // indirect

@@ -13,24 +13,21 @@ import (
 )
 
 // Destroy handles destroy command logic
-func Destroy(debug bool) error {
+func Destroy(debug bool) {
 	path, err := config.GetConfigPath()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get configuration file")
-		return err
+		log.Fatal().Err(err).Msg("failed to get configuration file")
 	}
 
 	var cfg config.Config
 	err = cfg.Load(path)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to load configuration try to login again using gridify login")
-		return err
+		log.Fatal().Err(err).Msg("failed to load configuration try to login again using gridify login")
 	}
 
 	repoURL, err := repository.GetRepositoryURL(".")
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get remote repository url")
-		return err
+		log.Fatal().Err(err).Msg("failed to get remote repository url")
 	}
 
 	logLevel := zerolog.InfoLevel
@@ -45,21 +42,17 @@ func Destroy(debug bool) error {
 
 	tfPluginClient, err := tfplugin.NewTFPluginClient(cfg.Mnemonics, cfg.Network)
 	if err != nil {
-		log.Error().
+		log.Fatal().
 			Err(err).
 			Msgf("failed to get threefold plugin client using mnemonics: '%s' on grid network '%s'", cfg.Mnemonics, cfg.Network)
-		return err
 	}
 	deployer, err := deployer.NewDeployer(&tfPluginClient, string(repoURL), logger)
 	if err != nil {
-		log.Error().Err(err).Send()
-		return err
+		log.Fatal().Err(err).Send()
 	}
 
 	err = deployer.Destroy()
 	if err != nil {
-		log.Error().Err(err).Send()
-		return err
+		log.Fatal().Err(err).Send()
 	}
-	return nil
 }

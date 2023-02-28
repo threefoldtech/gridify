@@ -3,7 +3,6 @@ package cmd
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -14,37 +13,32 @@ import (
 )
 
 // Login handles login command logic
-func Login(debug bool) error {
+func Login(debug bool) {
 	scanner := bufio.NewReader(os.Stdin)
 
 	fmt.Print("Please enter your mnemonics: ")
 	mnemonics, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Error().Err(err).Msg("failed to read mnemonics")
-		return err
+		log.Fatal().Err(err).Msg("failed to read mnemonics")
 	}
 	mnemonics = strings.TrimSpace(mnemonics)
 	if !bip39.IsMnemonicValid(mnemonics) {
-		log.Error().Msg("failed to validate mnemonics")
-		return errors.New("login failed")
+		log.Fatal().Msg("failed to validate mnemonics")
 	}
 
 	fmt.Print("Please enter grid network (main,test): ")
 	network, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Error().Err(err).Msg("failed to read grid network")
-		return err
+		log.Fatal().Err(err).Msg("failed to read grid network")
 	}
 	network = strings.TrimSpace(network)
 
 	if network != "dev" && network != "qa" && network != "test" && network != "main" {
-		log.Error().Msg("invalid grid network, must be one of: dev, test, qa and main")
-		return errors.New("login failed")
+		log.Fatal().Msg("invalid grid network, must be one of: dev, test, qa and main")
 	}
 	path, err := config.GetConfigPath()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get configuration file")
-		return err
+		log.Fatal().Err(err).Msg("failed to get configuration file")
 	}
 
 	var cfg config.Config
@@ -53,9 +47,7 @@ func Login(debug bool) error {
 
 	err = cfg.Save(path)
 	if err != nil {
-		log.Error().Err(err).Send()
-		return err
+		log.Fatal().Err(err).Send()
 	}
 	log.Info().Msg("configuration saved")
-	return nil
 }

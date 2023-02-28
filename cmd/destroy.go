@@ -3,7 +3,6 @@ package cmd
 
 import (
 	command "github.com/rawdaGastan/gridify/internal/cmd"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -14,10 +13,11 @@ var destroyCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		debug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
-			log.Error().Err(err).Send()
 			return err
 		}
-		return command.Destroy(debug)
+
+		command.Destroy(debug)
+		return nil
 	},
 }
 
