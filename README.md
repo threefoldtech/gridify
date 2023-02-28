@@ -40,7 +40,11 @@ gridify destroy
 
 - Download the binaries from [releases](https://github.com/threefoldtech/gridify/releases)
 - Extract the downloaded files
-- move the binary to any of `$PATH` directories
+- Move the binary to any of `$PATH` directories, for example:
+
+```bash
+mv gridify /usr/local/bin
+```
 
 ## Configuration
 
