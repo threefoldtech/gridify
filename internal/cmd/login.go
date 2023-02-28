@@ -3,12 +3,12 @@ package cmd
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
 
 	bip39 "github.com/cosmos/go-bip39"
+	"github.com/pkg/errors"
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rs/zerolog/log"
 )
@@ -20,31 +20,26 @@ func Login(debug bool) error {
 	fmt.Print("Please enter your mnemonics: ")
 	mnemonics, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Error().Err(err).Msg("failed to read mnemonics")
-		return err
+		return errors.Wrap(err, "failed to read mnemonics")
 	}
 	mnemonics = strings.TrimSpace(mnemonics)
 	if !bip39.IsMnemonicValid(mnemonics) {
-		log.Error().Msg("failed to validate mnemonics")
-		return errors.New("login failed")
+		return errors.New("failed to validate mnemonics")
 	}
 
 	fmt.Print("Please enter grid network (main,test): ")
 	network, err := scanner.ReadString('\n')
 	if err != nil {
-		log.Error().Err(err).Msg("failed to read grid network")
-		return err
+		return errors.Wrap(err, "failed to read grid network")
 	}
 	network = strings.TrimSpace(network)
 
 	if network != "dev" && network != "qa" && network != "test" && network != "main" {
-		log.Error().Msg("invalid grid network, must be one of: dev, test, qa and main")
-		return errors.New("login failed")
+		return errors.New("invalid grid network, must be one of: dev, test, qa and main")
 	}
 	path, err := config.GetConfigPath()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get configuration file")
-		return err
+		return errors.Wrap(err, "failed to get configuration file")
 	}
 
 	var cfg config.Config
@@ -53,7 +48,6 @@ func Login(debug bool) error {
 
 	err = cfg.Save(path)
 	if err != nil {
-		log.Error().Err(err).Send()
 		return err
 	}
 	log.Info().Msg("configuration saved")

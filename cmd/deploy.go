@@ -16,17 +16,19 @@ var deployCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ports, err := cmd.Flags().GetUintSlice("ports")
 		if err != nil {
-			log.Error().Err(err).Send()
 			return err
 		}
 
 		debug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
-			log.Error().Err(err).Send()
 			return err
 		}
 
-		return command.Deploy(ports, debug)
+		err = command.Deploy(ports, debug)
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
+		return nil
 	},
 }
 

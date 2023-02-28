@@ -4,33 +4,30 @@ package cmd
 import (
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/rawdaGastan/gridify/internal/config"
 	"github.com/rawdaGastan/gridify/internal/deployer"
 	"github.com/rawdaGastan/gridify/internal/repository"
 	"github.com/rawdaGastan/gridify/internal/tfplugin"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 // Destroy handles destroy command logic
 func Destroy(debug bool) error {
 	path, err := config.GetConfigPath()
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get configuration file")
-		return err
+		return errors.Wrap(err, "failed to get configuration file")
 	}
 
 	var cfg config.Config
 	err = cfg.Load(path)
 	if err != nil {
-		log.Error().Err(err).Msg("failed to load configuration try to login again using gridify login")
-		return err
+		return errors.Wrap(err, "failed to load configuration try to login again using gridify login")
 	}
 
 	repoURL, err := repository.GetRepositoryURL(".")
 	if err != nil {
-		log.Error().Err(err).Msg("failed to get remote repository url")
-		return err
+		return errors.Wrap(err, "failed to get remote repository url")
 	}
 
 	logLevel := zerolog.InfoLevel
@@ -45,20 +42,19 @@ func Destroy(debug bool) error {
 
 	tfPluginClient, err := tfplugin.NewTFPluginClient(cfg.Mnemonics, cfg.Network)
 	if err != nil {
-		log.Error().
-			Err(err).
-			Msgf("failed to get threefold plugin client using mnemonics: '%s' on grid network '%s'", cfg.Mnemonics, cfg.Network)
-		return err
+		return errors.Wrapf(err,
+			"failed to get threefold plugin client using mnemonics: '%s' on grid network '%s'",
+			cfg.Mnemonics,
+			cfg.Network,
+		)
 	}
 	deployer, err := deployer.NewDeployer(&tfPluginClient, string(repoURL), logger)
 	if err != nil {
-		log.Error().Err(err).Send()
 		return err
 	}
 
 	err = deployer.Destroy()
 	if err != nil {
-		log.Error().Err(err).Send()
 		return err
 	}
 	return nil

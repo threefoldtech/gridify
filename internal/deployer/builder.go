@@ -51,7 +51,14 @@ func findNode(tfPluginClient tfplugin.TFPluginClientInterface) (uint32, error) {
 		return 0, err
 	}
 	if len(nodes) == 0 {
-		return 0, fmt.Errorf("no node with free resources available using node filter %+v", filter)
+		return 0, fmt.Errorf(
+			"no node with free resources available using node filter: farmIDs: %v, mru: %d, hru: %d, freeips: %d, domain: %t",
+			filter.FarmIDs,
+			*filter.FreeMRU,
+			*filter.FreeHRU,
+			*filter.FreeIPs,
+			*filter.Domain,
+		)
 	}
 
 	node := uint32(nodes[0].NodeID)

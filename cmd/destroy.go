@@ -14,10 +14,14 @@ var destroyCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		debug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
-			log.Error().Err(err).Send()
 			return err
 		}
-		return command.Destroy(debug)
+
+		err = command.Destroy(debug)
+		if err != nil {
+			log.Fatal().Err(err).Send()
+		}
+		return nil
 	},
 }
 
