@@ -36,7 +36,30 @@ func TestDeploy(t *testing.T) {
 	deployer, err := NewDeployer(clientMock, repoURL, log.Logger.Level(zerolog.Disabled))
 	assert.NoError(t, err)
 
+	t.Run("error listing contracts of a project", func(t *testing.T) {
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, errors.New("error"))
+
+		_, err := deployer.Deploy(context.Background(), []uint{80})
+		assert.Error(t, err)
+	})
+	t.Run("deployment for same project already exists", func(t *testing.T) {
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{NameContracts: []graphql.Contract{{ContractID: "10"}}}, nil)
+
+		_, err := deployer.Deploy(context.Background(), []uint{80})
+		assert.Error(t, err)
+	})
 	t.Run("no nodes available", func(t *testing.T) {
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).
@@ -51,6 +74,11 @@ func TestDeploy(t *testing.T) {
 		assert.Error(t, err)
 	})
 	t.Run("error finding available nodes", func(t *testing.T) {
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).
@@ -68,6 +96,11 @@ func TestDeploy(t *testing.T) {
 		rand.Seed(1)
 		clientMock.
 			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
+		clientMock.
+			EXPECT().
 			FilterNodes(filter, gomock.Any()).
 			Return([]types.Node{{NodeID: 1}}, 0, nil)
 
@@ -81,6 +114,11 @@ func TestDeploy(t *testing.T) {
 	})
 	t.Run("vm deployment failed", func(t *testing.T) {
 		rand.Seed(1)
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).
@@ -101,6 +139,11 @@ func TestDeploy(t *testing.T) {
 	})
 	t.Run("loading vm failed", func(t *testing.T) {
 		rand.Seed(1)
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).
@@ -126,6 +169,11 @@ func TestDeploy(t *testing.T) {
 	})
 	t.Run("gateway deployment failed", func(t *testing.T) {
 		rand.Seed(1)
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).
@@ -156,6 +204,11 @@ func TestDeploy(t *testing.T) {
 	})
 	t.Run("loading gateway failed", func(t *testing.T) {
 		rand.Seed(1)
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).
@@ -193,6 +246,11 @@ func TestDeploy(t *testing.T) {
 		rand.Seed(1)
 		clientMock.
 			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
+		clientMock.
+			EXPECT().
 			FilterNodes(filter, gomock.Any()).
 			Return([]types.Node{{NodeID: 1}}, 0, nil)
 
@@ -227,6 +285,11 @@ func TestDeploy(t *testing.T) {
 	})
 	t.Run("deploying using multiple ports", func(t *testing.T) {
 		rand.Seed(1)
+		clientMock.
+			EXPECT().
+			ListContractsOfProjectName(projectName).
+			Return(graphql.Contracts{}, nil)
+
 		clientMock.
 			EXPECT().
 			FilterNodes(filter, gomock.Any()).

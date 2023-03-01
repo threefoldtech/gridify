@@ -43,6 +43,17 @@ func NewDeployer(tfPluginClient tfplugin.TFPluginClientInterface, repoURL string
 // Deploy deploys a project and map each port to a domain
 func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, error) {
 
+	contracts, err := d.tfPluginClient.ListContractsOfProjectName(d.projectName)
+	if err != nil {
+		return map[uint]string{}, errors.Wrapf(err, "could not check existing contracts for project %s", d.projectName)
+	}
+	if len(contracts.NameContracts) != 0 || len(contracts.NodeContracts) != 0 {
+		return map[uint]string{}, fmt.Errorf(
+			"project %s already deployed please destroy project deployment first using gridify destroy",
+			d.projectName,
+		)
+	}
+
 	d.logger.Debug().Msg("getting nodes with free resources")
 
 	node, err := findNode(d.tfPluginClient)
