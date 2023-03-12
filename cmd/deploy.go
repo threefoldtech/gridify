@@ -2,8 +2,6 @@
 package cmd
 
 import (
-	"os"
-
 	command "github.com/rawdaGastan/gridify/internal/cmd"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -23,8 +21,12 @@ var deployCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		vmSpec, err := cmd.Flags().GetString("spec")
+		if err != nil {
+			return err
+		}
 
-		err = command.Deploy(ports, debug)
+		err = command.Deploy(vmSpec, ports, debug)
 		if err != nil {
 			log.Fatal().Err(err).Send()
 		}
@@ -38,7 +40,8 @@ func init() {
 	deployCmd.Flags().UintSliceP("ports", "p", []uint{}, "ports to forward the FQDNs to")
 	err := deployCmd.MarkFlagRequired("ports")
 	if err != nil {
-		log.Error().Err(err).Send()
-		os.Exit(1)
+		log.Fatal().Err(err).Send()
 	}
+	deployCmd.Flags().StringP("spec", "s", "eco", "vm spec can be (eco, standard, performance)")
+
 }

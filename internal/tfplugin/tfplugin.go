@@ -74,7 +74,7 @@ func (t *TFPluginClient) CancelContract(contractID uint64) error {
 	return t.tfPluginClient.SubstrateConn.CancelContract(t.tfPluginClient.Identity, contractID)
 }
 
-// FilterNodes retruns nodes that match the given filter
+// FilterNodes returns nodes that match the given filter
 func (t *TFPluginClient) FilterNodes(filter types.NodeFilter, pagination types.Limit) (res []types.Node, totalCount int, err error) {
 	return t.tfPluginClient.GridProxyClient.Nodes(filter, pagination)
 }
