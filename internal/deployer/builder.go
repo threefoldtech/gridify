@@ -14,48 +14,78 @@ import (
 )
 
 var (
-	vmFlist      = "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist"
-	vmCPU        = 2
-	vmMemory     = 2 // GB
-	vmRootfsSize = 5 // GB
-	vmEntrypoint = "/init.sh"
-	vmPublicIP   = true
-	vmPlanetary  = true
+	vmFlist                 = "https://hub.grid.tf/aelawady.3bot/abdulrahmanelawady-gridify-test-latest.flist"
+	eco                     = "eco"
+	standard                = "standard"
+	performance             = "performance"
+	vmSpecs                 = []string{eco, standard, performance}
+	ecoVMCPU                = 1
+	ecoVMMemory             = 2 // GB
+	ecoVMRootfsSize         = 5 // GB
+	standardVMCPU           = 2
+	standardVMMemory        = 4  // GB
+	standardVMRootfsSize    = 10 // GB
+	performanceVMCPU        = 4
+	performanceVMMemory     = 8  // GB
+	performanceVMRootfsSize = 15 // GB
+	vmEntrypoint            = "/init.sh"
+	vmPublicIP              = true
+	vmPlanetary             = true
 )
 
-func buildNodeFilter() types.NodeFilter {
+func isValidVMSpec(spec string) bool {
+	for _, s := range vmSpecs {
+		if s == spec {
+			return true
+		}
+	}
+	return false
+}
+
+func buildNodeFilter(vmSpec string) types.NodeFilter {
 	nodeStatus := "up"
-	freeMRU := uint64(vmMemory)
-	freeHRU := uint64(vmRootfsSize)
+	freeMRU := uint64(0)
+	freeSRU := uint64(0)
 	freeIPs := uint64(0)
 	if vmPublicIP {
 		freeIPs = 1
 	}
 	domain := true
 
+	switch vmSpec {
+	case eco:
+		freeMRU = uint64(ecoVMMemory)
+		freeSRU = uint64(ecoVMRootfsSize)
+	case standard:
+		freeMRU = uint64(standardVMMemory)
+		freeSRU = uint64(standardVMRootfsSize)
+	case performance:
+		freeMRU = uint64(performanceVMMemory)
+		freeSRU = uint64(performanceVMRootfsSize)
+	}
 	filter := types.NodeFilter{
 		FarmIDs: []uint64{1},
 		Status:  &nodeStatus,
 		FreeMRU: &freeMRU,
-		FreeHRU: &freeHRU,
+		FreeSRU: &freeSRU,
 		FreeIPs: &freeIPs,
 		Domain:  &domain,
 	}
 	return filter
 }
 
-func findNode(tfPluginClient tfplugin.TFPluginClientInterface) (uint32, error) {
-	filter := buildNodeFilter()
+func findNode(vmSpec string, tfPluginClient tfplugin.TFPluginClientInterface) (uint32, error) {
+	filter := buildNodeFilter(vmSpec)
 	nodes, _, err := tfPluginClient.FilterNodes(filter, types.Limit{})
 	if err != nil {
 		return 0, err
 	}
 	if len(nodes) == 0 {
 		return 0, fmt.Errorf(
-			"no node with free resources available using node filter: farmIDs: %v, mru: %d, hru: %d, freeips: %d, domain: %t",
+			"no node with free resources available using node filter: farmIDs: %v, mru: %d, sru: %d, freeips: %d, domain: %t",
 			filter.FarmIDs,
 			*filter.FreeMRU,
-			*filter.FreeHRU,
+			*filter.FreeSRU,
 			*filter.FreeIPs,
 			*filter.Domain,
 		)
@@ -79,21 +109,33 @@ func buildNetwork(projectName string, node uint32) workloads.ZNet {
 	return network
 }
 
-func buildDeployment(networkName, projectName, repoURL string, node uint32) workloads.Deployment {
+func buildDeployment(vmSpec, networkName, projectName, repoURL string, node uint32) workloads.Deployment {
 	vmName := randName(10)
 	vm := workloads.VM{
 		Name:       vmName,
 		Flist:      vmFlist,
-		CPU:        vmCPU,
 		PublicIP:   vmPublicIP,
 		Planetary:  vmPlanetary,
-		Memory:     vmMemory * 1024,
-		RootfsSize: vmRootfsSize * 1024,
 		Entrypoint: vmEntrypoint,
 		EnvVars: map[string]string{
 			"REPO_URL": repoURL,
 		},
 		NetworkName: networkName,
+	}
+
+	switch vmSpec {
+	case eco:
+		vm.CPU = ecoVMCPU
+		vm.Memory = ecoVMMemory * 1024
+		vm.RootfsSize = ecoVMRootfsSize * 1024
+	case standard:
+		vm.CPU = standardVMCPU
+		vm.Memory = standardVMMemory * 1024
+		vm.RootfsSize = standardVMRootfsSize * 1024
+	case performance:
+		vm.CPU = performanceVMCPU
+		vm.Memory = performanceVMMemory * 1024
+		vm.RootfsSize = performanceVMRootfsSize * 1024
 	}
 
 	dl := workloads.NewDeployment(vm.Name, node, projectName, nil, networkName, nil, nil, []workloads.VM{vm}, nil)

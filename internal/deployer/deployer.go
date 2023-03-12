@@ -41,7 +41,7 @@ func NewDeployer(tfPluginClient tfplugin.TFPluginClientInterface, repoURL string
 }
 
 // Deploy deploys a project and map each port to a domain
-func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, error) {
+func (d *Deployer) Deploy(ctx context.Context, vmSpec string, ports []uint) (map[uint]string, error) {
 
 	contracts, err := d.tfPluginClient.ListContractsOfProjectName(d.projectName)
 	if err != nil {
@@ -54,9 +54,13 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 		)
 	}
 
+	if !isValidVMSpec(vmSpec) {
+		return map[uint]string{}, fmt.Errorf("invalid vm spec %s", vmSpec)
+	}
+
 	d.logger.Debug().Msg("getting nodes with free resources")
 
-	node, err := findNode(d.tfPluginClient)
+	node, err := findNode(vmSpec, d.tfPluginClient)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(
 			err,
@@ -65,15 +69,16 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 		)
 	}
 
-	d.logger.Info().Msg("deploying a network")
 	network := buildNetwork(d.projectName, node)
+	dl := buildDeployment(vmSpec, network.Name, d.projectName, d.repoURL, node)
+
+	d.logger.Info().Msg("deploying a network")
 	err = d.tfPluginClient.DeployNetwork(ctx, &network)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy network %s on node %d", network.Name, node)
 	}
 
 	d.logger.Info().Msg("deploying a vm")
-	dl := buildDeployment(network.Name, d.projectName, d.repoURL, node)
 	err = d.tfPluginClient.DeployDeployment(ctx, &dl)
 	if err != nil {
 		return map[uint]string{}, errors.Wrapf(err, "could not deploy vm %s on node %d", dl.Name, node)
@@ -103,7 +108,7 @@ func (d *Deployer) Deploy(ctx context.Context, ports []uint) (map[uint]string, e
 		FQDNs[port] = resGateway.FQDN
 	}
 
-	d.logger.Info().Msg("Project Deployed!")
+	d.logger.Info().Msg("project deployed")
 
 	return FQDNs, nil
 }
@@ -128,7 +133,7 @@ func (d *Deployer) Destroy() error {
 			return errors.Wrapf(err, "could not cancel contract %d", contractID)
 		}
 	}
-	d.logger.Info().Msg("Project Destroyed!")
+	d.logger.Info().Msg("project destroyed")
 	return nil
 }
 
